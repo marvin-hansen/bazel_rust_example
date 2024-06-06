@@ -1,0 +1,49 @@
+# `.bazelrc` is a Bazel configuration file.
+# https://bazel.build/docs/best-practices#bazelrc-file
+
+# Required on windows
+common --enable_platform_specific_config
+startup --windows_enable_symlinks
+build:windows --enable_runfiles
+
+# Don't create bazel-* symlinks in the WORKSPACE directory.
+# Instead, set a prefix and put it in .gitignore
+build --symlink_prefix=target-bzl/
+
+# Non-empty glob isn't currently the default in Bazel,
+# but we enable it to test that the repo is ready if/when it flips.
+# build --incompatible_disallow_empty_glob
+
+# Reduce test output to just error cases
+test --test_output=errors
+test --verbose_failures
+
+# Disable MODULE for the time being.
+# Migrate all dependencies from WORKSPACE to MODULE.bazel
+# https://github.com/bazelbuild/rules_rust/issues/2181
+common --noenable_bzlmod
+
+# Enable misc. performance optimizations.
+# https://www.buildbuddy.io/blog/debugging-slow-bazel-builds/
+# https://www.buildbuddy.io/blog/how-bazel-7-0-makes-your-builds-faster/
+common --nolegacy_important_outputs
+common --verbose_failures
+common --reuse_sandbox_directories
+common --noexperimental_merged_skyframe_analysis_execution
+# For a more detailed profile
+common --noslim_profile
+common --experimental_profile_include_target_label
+common --experimental_profile_include_primary_output
+
+# Write build outputs in a platform-specific directory;
+# avoid cache being wiped and rewritten when switching between platforms.
+common --experimental_platform_in_output_dir
+
+# Enable rustfmt for all targets in the workspace
+build:rustfmt --aspects=@rules_rust//rust:defs.bzl%rustfmt_aspect
+build:rustfmt --output_groups=+rustfmt_checks
+
+# Enable clippy for all targets in the workspace
+build:clippy --aspects=@rules_rust//rust:defs.bzl%rust_clippy_aspect
+build:clippy --output_groups=+clippy_checks
+
