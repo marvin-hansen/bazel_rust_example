@@ -2,10 +2,16 @@
 
 Example of how to build a mini Rust monorepo using Bazel.
 
-The Cargo config uses a standard workspace with central dependencies to inherited to two crates.
-The Bazel config roughly replicates the idea, but also adds Docker-less OCI image building & publishing.
-Publishing container images to a container registry, however, is disabled until the target registry is configured.
-Run `make release` to see details which config to update. 
+The project covers quite a bit of groundwork:
+* Cargo & Bazel config side by side
+* Bazel direct dependencies (not generated from Cargo.toml)
+* Builds proto bindings for gRPC with prost
+* Builds two crates in a workspace where one depends on the other
+* Applies the full-swing of compiler optimization & binary size reduction using pass-through options
+* Builds and tags OCI images docker-less (I wrote some custom macros to simplify these tasks)
+
+Publishing the container image to a container registry, however, is disabled until the target registry is configured.
+Please run `make release` to see details which config to update. 
 
 ## Requirements
 
