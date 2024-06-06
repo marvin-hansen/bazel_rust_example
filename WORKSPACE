@@ -8,10 +8,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 ###############################################################################
 http_archive(
     name = "bazel_skylib",
-    sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
+    sha256 = "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
     ],
 )
 
@@ -24,8 +24,8 @@ bazel_skylib_workspace()
 ###############################################################################
 http_archive(
     name = "rules_rust",
-    integrity = "sha256-XT1YVJ6FHJTXBr1v3px2fV37/OCS3dQk3ul+XvfIIf8=",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.42.0/rules_rust-v0.42.0.tar.gz"],
+    integrity = "sha256-+bWb47wg0VchIADaHt6L5Dma2Gn+Q589nz/MKcTi+lo=",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.45.1/rules_rust-v0.45.1.tar.gz"],
 )
 
 RUST_EDITION = "2021"
@@ -42,14 +42,71 @@ rust_register_toolchains(
 )
 
 ###############################################################################
+# R U S T  M U S L  C O N F I G
+# https://github.com/bazelbuild/rules_rust/blob/main/examples/musl_cross_compiling/WORKSPACE.bazel
+###############################################################################
+
+rust_repository_set(
+    name = "darwin_x86_64_to_x86_64_musl_tuple",
+    edition = RUST_EDITION,
+    exec_triple = "x86_64-apple-darwin",
+    # Setting this extra_target_triples allows differentiating the musl case from the non-musl case,
+    # in case multiple linux-targeting toolchains are registered.
+    extra_target_triples = {"x86_64-unknown-linux-musl": [
+        "@//linker_config:musl",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ]},
+    versions = [RUST_VERSION],
+)
+
+rust_repository_set(
+    name = "darwin_arm64_to_x86_64_musl_tuple",
+    edition = RUST_EDITION,
+    exec_triple = "aarch64-apple-darwin",
+    extra_target_triples = {"x86_64-unknown-linux-musl": [
+        "@//linker_config:musl",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ]},
+    versions = [RUST_VERSION],
+)
+
+rust_repository_set(
+    name = "darwin_x86_64_to_arm64_musl_tuple",
+    edition = RUST_EDITION,
+    exec_triple = "x86_64-apple-darwin",
+    # Setting this extra_target_triples allows differentiating the musl case from the non-musl case,
+    # in case multiple linux-targeting toolchains are registered.
+    extra_target_triples = {"aarch64-unknown-linux-musl": [
+        "@//linker_config:musl",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ]},
+    versions = [RUST_VERSION],
+)
+
+rust_repository_set(
+    name = "darwin_arm64_to_arm64_musl_tuple",
+    edition = RUST_EDITION,
+    exec_triple = "aarch64-apple-darwin",
+    extra_target_triples = {"aarch64-unknown-linux-musl": [
+        "@//linker_config:musl",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ]},
+    versions = [RUST_VERSION],
+)
+
+###############################################################################
 # R U L E S  A S P E C T
 # Releases: https://github.com/aspect-build/bazel-lib/releases
 ###############################################################################
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "ac6392cbe5e1cc7701bbd81caf94016bae6f248780e12af4485d4a7127b4cb2b",
-    strip_prefix = "bazel-lib-2.6.1",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.6.1/bazel-lib-v2.6.1.tar.gz",
+    sha256 = "6d758a8f646ecee7a3e294fbe4386daafbe0e5966723009c290d493f227c390b",
+    strip_prefix = "bazel-lib-2.7.7",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.7/bazel-lib-v2.7.7.tar.gz",
 )
 
 load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "aspect_bazel_lib_register_toolchains")
@@ -95,9 +152,9 @@ rust_prost_transitive_repositories()
 ###############################################################################
 http_archive(
     name = "rules_oci",
-    sha256 = "56d5499025d67a6b86b2e6ebae5232c72104ae682b5a21287770bd3bf0661abf",
-    strip_prefix = "rules_oci-1.7.5",
-    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.7.5/rules_oci-v1.7.5.tar.gz",
+    sha256 = "647f4c6fd092dc7a86a7f79892d4b1b7f1de288bdb4829ca38f74fd430fcd2fe",
+    strip_prefix = "rules_oci-1.7.6",
+    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.7.6/rules_oci-v1.7.6.tar.gz",
 )
 
 load("@rules_oci//oci:dependencies.bzl", "rules_oci_dependencies")
@@ -121,7 +178,7 @@ oci_pull(
 # R U S T  C R A T E S
 ###############################################################################
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
-crate_universe_dependencies(bootstrap = True)
+# crate_universe_dependencies(bootstrap = True)
 
 # Track dependencies of all crates.
 # When you add a new crate, re-run:
@@ -142,6 +199,7 @@ crates_repository(
                           version = "0.1.42",
             ),
 
+            # Regular Rust dependencies.
             "prost": crate.spec(
                          version = "0.12",
             ),

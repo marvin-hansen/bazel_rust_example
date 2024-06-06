@@ -1,5 +1,5 @@
 {
-  "checksum": "8b9be283089c4b6592242823c7a9c87db85fbc6271580bd16b2acc807a72ee9f",
+  "checksum": "b00c8a72fee4e4f85a3bf75949570b9abb85a72e4cae92d85020996c9e860941",
   "crates": {
     "addr2line 0.22.0": {
       "name": "addr2line",
@@ -4464,7 +4464,145 @@
             }
           ],
           "selects": {
-            "cfg(unix)": [
+            "aarch64-apple-darwin": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-apple-ios": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-apple-ios-sim": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-fuchsia": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-linux-android": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-unknown-nixos-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-unknown-nto-qnx710": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "arm-unknown-linux-gnueabi": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "armv7-linux-androideabi": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "armv7-unknown-linux-gnueabi": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "i686-apple-darwin": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "i686-linux-android": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "i686-unknown-freebsd": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "i686-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "powerpc-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "s390x-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-apple-darwin": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-apple-ios": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-fuchsia": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-linux-android": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-unknown-freebsd": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-unknown-nixos-gnu": [
               {
                 "id": "libc 0.2.155",
                 "target": "libc"
@@ -4864,6 +5002,83 @@
             }
           ],
           "selects": {
+            "aarch64-apple-darwin": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-apple-ios": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-apple-ios-sim": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-fuchsia": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-linux-android": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "aarch64-unknown-nto-qnx710": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "armv7-linux-androideabi": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
             "cfg(all(any(target_os = \"android\", target_os = \"linux\"), any(rustix_use_libc, miri, not(all(target_os = \"linux\", target_endian = \"little\", any(target_arch = \"arm\", all(target_arch = \"aarch64\", target_pointer_width = \"64\"), target_arch = \"riscv64\", all(rustix_use_experimental_asm, target_arch = \"powerpc64\"), all(rustix_use_experimental_asm, target_arch = \"mips\"), all(rustix_use_experimental_asm, target_arch = \"mips32r6\"), all(rustix_use_experimental_asm, target_arch = \"mips64\"), all(rustix_use_experimental_asm, target_arch = \"mips64r6\"), target_arch = \"x86\", all(target_arch = \"x86_64\", target_pointer_width = \"64\")))))))": [
               {
                 "id": "linux-raw-sys 0.4.14",
@@ -4896,6 +5111,127 @@
               {
                 "id": "windows-sys 0.52.0",
                 "target": "windows_sys"
+              }
+            ],
+            "i686-apple-darwin": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "i686-linux-android": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "i686-unknown-freebsd": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "powerpc-unknown-linux-gnu": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "s390x-unknown-linux-gnu": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "wasm32-wasi": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-apple-darwin": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-apple-ios": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-fuchsia": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-linux-android": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              }
+            ],
+            "x86_64-unknown-freebsd": [
+              {
+                "id": "errno 0.3.9",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
               }
             ]
           }
@@ -5563,7 +5899,165 @@
             }
           ],
           "selects": {
-            "cfg(not(target_family = \"wasm\"))": [
+            "aarch64-apple-darwin": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-apple-ios": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-apple-ios-sim": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-fuchsia": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-linux-android": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-pc-windows-msvc": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              },
+              {
+                "id": "windows-sys 0.48.0",
+                "target": "windows_sys"
+              }
+            ],
+            "aarch64-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-unknown-nixos-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-unknown-nto-qnx710": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "arm-unknown-linux-gnueabi": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "armv7-linux-androideabi": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "armv7-unknown-linux-gnueabi": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
               {
                 "id": "socket2 0.5.7",
                 "target": "socket2"
@@ -5575,7 +6069,7 @@
                 "target": "backtrace"
               }
             ],
-            "cfg(unix)": [
+            "i686-apple-darwin": [
               {
                 "id": "libc 0.2.155",
                 "target": "libc"
@@ -5583,12 +6077,228 @@
               {
                 "id": "signal-hook-registry 1.4.2",
                 "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
               }
             ],
-            "cfg(windows)": [
+            "i686-linux-android": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "i686-pc-windows-msvc": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              },
               {
                 "id": "windows-sys 0.48.0",
                 "target": "windows_sys"
+              }
+            ],
+            "i686-unknown-freebsd": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "i686-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "powerpc-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "riscv32imc-unknown-none-elf": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "riscv64gc-unknown-none-elf": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "s390x-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "thumbv7em-none-eabi": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "thumbv8m.main-none-eabi": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-apple-darwin": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-apple-ios": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-fuchsia": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-linux-android": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-pc-windows-msvc": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              },
+              {
+                "id": "windows-sys 0.48.0",
+                "target": "windows_sys"
+              }
+            ],
+            "x86_64-unknown-freebsd": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-unknown-nixos-gnu": [
+              {
+                "id": "libc 0.2.155",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.2",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-unknown-none": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
               }
             ]
           }
@@ -7977,7 +8687,8 @@
       "aarch64-pc-windows-msvc"
     ],
     "aarch64-unknown-linux-gnu": [
-      "aarch64-unknown-linux-gnu"
+      "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu"
     ],
     "aarch64-unknown-nixos-gnu": [
       "aarch64-unknown-nixos-gnu"
@@ -8120,40 +8831,6 @@
       "x86_64-unknown-nixos-gnu",
       "x86_64-unknown-none"
     ],
-    "cfg(not(target_family = \"wasm\"))": [
-      "aarch64-apple-darwin",
-      "aarch64-apple-ios",
-      "aarch64-apple-ios-sim",
-      "aarch64-fuchsia",
-      "aarch64-linux-android",
-      "aarch64-pc-windows-msvc",
-      "aarch64-unknown-linux-gnu",
-      "aarch64-unknown-nixos-gnu",
-      "aarch64-unknown-nto-qnx710",
-      "arm-unknown-linux-gnueabi",
-      "armv7-linux-androideabi",
-      "armv7-unknown-linux-gnueabi",
-      "i686-apple-darwin",
-      "i686-linux-android",
-      "i686-pc-windows-msvc",
-      "i686-unknown-freebsd",
-      "i686-unknown-linux-gnu",
-      "powerpc-unknown-linux-gnu",
-      "riscv32imc-unknown-none-elf",
-      "riscv64gc-unknown-none-elf",
-      "s390x-unknown-linux-gnu",
-      "thumbv7em-none-eabi",
-      "thumbv8m.main-none-eabi",
-      "x86_64-apple-darwin",
-      "x86_64-apple-ios",
-      "x86_64-fuchsia",
-      "x86_64-linux-android",
-      "x86_64-pc-windows-msvc",
-      "x86_64-unknown-freebsd",
-      "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-nixos-gnu",
-      "x86_64-unknown-none"
-    ],
     "cfg(not(windows))": [
       "aarch64-apple-darwin",
       "aarch64-apple-ios",
@@ -8283,7 +8960,8 @@
       "x86_64-unknown-freebsd"
     ],
     "x86_64-unknown-linux-gnu": [
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu"
     ],
     "x86_64-unknown-nixos-gnu": [
       "x86_64-unknown-nixos-gnu"
