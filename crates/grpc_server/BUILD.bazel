@@ -1,0 +1,77 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
+# OCI Container Rules
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
+# Custom container macro
+load("//:build_image.bzl", "build_image", "build_tag")
+
+# Build binary
+rust_binary(
+    name = "bin",
+    crate_root = "src/main.rs",
+    srcs = glob([
+        "src/*.rs",
+        "src/*/*.rs",
+    ]),
+    rustc_flags = select({
+       "//:release": [
+            "-Clto",
+            "-Ccodegen-units=1",
+            "-Cpanic=abort",
+            "-Copt-level=3",
+            "-Cstrip=symbols",
+            ],
+        "//conditions:default":
+        [
+           "-Copt-level=0",
+        ],
+    }),
+    deps = [
+        # Internal crates
+        "//crates/proto_bindings:rust_proto",
+        # External crates
+        "@crate_index//:prost",
+        "@crate_index//:tokio",
+        "@crate_index//:tonic",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# Build documentation
+rust_doc(
+    name = "doc",
+    crate = ":bin",
+    visibility = ["//visibility:public"],
+)
+
+# Test documentation
+rust_doc_test(
+     name = "doc_test",
+     crate = ":bin",
+     visibility = ["//visibility:public"],
+ )
+
+# Build container image
+build_image(
+    name = "image",
+    srcs = [":bin"],
+    exposed_ports = ["5050"],
+    visibility = ["//visibility:public"],
+)
+
+# Build an unique and immutable image tag based on the image SHA265 digest.
+build_tag(
+    name = "remote_tag",
+    image = ":image",
+    input = "image.json.sha256",
+    output = "_tag.txt",
+)
+
+# Publish image to registry
+oci_push(
+    name = "push",
+    image = ":image",
+    repository = "my.registry.host.com",
+    remote_tags = ":remote_tag",
+    visibility = ["//visibility:public"],
+)

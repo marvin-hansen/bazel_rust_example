@@ -9,6 +9,7 @@ help:
 	@echo ' Development:'
 	@echo '    make build   	Build the code base incrementally (fast) for dev.'
 	@echo '    make rebuild   	Sync dependencies and builds the code base from scratch (slow).'
+	@echo '    make release   	Build & test binaries and then build & publish container images (slow).'
 	@echo '    make container   Build the container images.'
 	@echo '    make doc   		Build documentation for the project.'
 	@echo '    make fix   		Fix linting issues as reported by clippy.'
@@ -35,6 +36,11 @@ build:
 .PHONY: rebuild
 rebuild:
 	@source scripts/rebuild.sh
+
+
+.PHONY: release
+release:
+	@source scripts/release.sh
 
 
 .PHONY: container

@@ -1,0 +1,47 @@
+load("@rules_multirun//:defs.bzl", "command", "multirun")
+
+
+filegroup(
+    name = "build",
+    srcs = [
+        "//crates/grpc_server:bin",
+        "//crates/proto_bindings:proto_bindings",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+filegroup(
+    name = "doc",
+    srcs = [
+        "//crates/grpc_server:doc",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+filegroup(
+    name = "image",
+    srcs = [
+        "//crates/grpc_server:image",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+
+multirun(
+    name = "push",
+    commands = [
+        "push_server",
+    ],
+    jobs = 1, # Set to 0 to run in parallel, 1 sets to sequential
+    visibility = ["//visibility:public"],
+)
+
+
+command(
+    name = "push_server",
+    command =  "//crates/grpc_server:push",
+    arguments = [], # Optional arguments passed directly to the tool
+)

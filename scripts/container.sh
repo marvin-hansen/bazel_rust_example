@@ -7,4 +7,4 @@ set -o pipefail
 command bazel build -c opt  //:image
 
 # Pushes all tagged images to registry
-command bazel run -c opt //:push
+# command bazel run -c opt //:push

@@ -1,0 +1,51 @@
+load("@rules_multirun//:defs.bzl", "command", "multirun")
+
+config_setting(
+    name = "release",
+    values = {
+        "compilation_mode": "opt",
+    },
+)
+
+
+filegroup(
+    name = "build",
+    srcs = [
+        "//crates:build",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+filegroup(
+    name = "doc",
+    srcs = [
+        "//crates:doc",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+filegroup(
+    name = "image",
+    srcs = [
+        "//crates:image",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+multirun(
+    name = "push",
+    commands = [
+        "push_images",
+    ],
+    jobs = 0, # Set to parallel
+    visibility = ["//visibility:public"],
+)
+
+command(
+    name = "push_images",
+    command = "//crates:push",
+    arguments = [], # Optional arguments passed directly to the tool
+)
