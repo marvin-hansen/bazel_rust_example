@@ -1,0 +1,8 @@
+.cargo
+.git
+target
+target-bzl
+target-bzl/bin
+target-bzl/out
+target-bzl/bazel_rust_example
+target-bzl/testlogs
