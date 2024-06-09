@@ -42,63 +42,6 @@ rust_register_toolchains(
 )
 
 ###############################################################################
-# R U S T  M U S L  C O N F I G
-# https://github.com/bazelbuild/rules_rust/blob/main/examples/musl_cross_compiling/WORKSPACE.bazel
-###############################################################################
-
-rust_repository_set(
-    name = "darwin_x86_64_to_x86_64_musl_tuple",
-    edition = RUST_EDITION,
-    exec_triple = "x86_64-apple-darwin",
-    # Setting this extra_target_triples allows differentiating the musl case from the non-musl case,
-    # in case multiple linux-targeting toolchains are registered.
-    extra_target_triples = {"x86_64-unknown-linux-musl": [
-        "@//linker_config:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ]},
-    versions = [RUST_VERSION],
-)
-
-rust_repository_set(
-    name = "darwin_arm64_to_x86_64_musl_tuple",
-    edition = RUST_EDITION,
-    exec_triple = "aarch64-apple-darwin",
-    extra_target_triples = {"x86_64-unknown-linux-musl": [
-        "@//linker_config:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ]},
-    versions = [RUST_VERSION],
-)
-
-rust_repository_set(
-    name = "darwin_x86_64_to_arm64_musl_tuple",
-    edition = RUST_EDITION,
-    exec_triple = "x86_64-apple-darwin",
-    # Setting this extra_target_triples allows differentiating the musl case from the non-musl case,
-    # in case multiple linux-targeting toolchains are registered.
-    extra_target_triples = {"aarch64-unknown-linux-musl": [
-        "@//linker_config:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ]},
-    versions = [RUST_VERSION],
-)
-
-rust_repository_set(
-    name = "darwin_arm64_to_arm64_musl_tuple",
-    edition = RUST_EDITION,
-    exec_triple = "aarch64-apple-darwin",
-    extra_target_triples = {"aarch64-unknown-linux-musl": [
-        "@//linker_config:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ]},
-    versions = [RUST_VERSION],
-)
-
-###############################################################################
 # R U L E S  A S P E C T
 # Releases: https://github.com/aspect-build/bazel-lib/releases
 ###############################################################################
