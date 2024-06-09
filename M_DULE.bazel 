@@ -46,6 +46,10 @@ register_toolchains(
     "@rust_toolchains//:all",
 )
 
+# No idea if bootstrap is actually needed.
+# cargo_bazel_bootstrap = use_extension("//crate_universe/private/module_extensions:cargo_bazel_bootstrap.bzl", "cargo_bazel_bootstrap")
+# use_repo(cargo_bazel_bootstrap, "cargo_bazel_bootstrap")
+
 register_toolchains(
     "//proto/protobuf:default-proto-toolchain",
 )
