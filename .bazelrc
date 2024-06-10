@@ -12,7 +12,7 @@ build --symlink_prefix=target-bzl/
 
 # Non-empty glob isn't currently the default in Bazel,
 # but we enable it to test that the repo is ready if/when it flips.
-# build --incompatible_disallow_empty_glob
+common --incompatible_disallow_empty_glob
 
 # Reduce test output to just error cases
 test --test_output=errors
