@@ -29,7 +29,7 @@ rust.toolchain(edition = "2021")
 use_repo(rust, "rust_toolchains")
 register_toolchains("@rust_toolchains//:all")
 # Proto toolchain
-# register_toolchains("//proto/protobuf:default-proto-toolchain")
+register_toolchains("//proto/protobuf:default-proto-toolchain")
 # Prost toolchain
 register_toolchains("//proto/prost:default_prost_toolchain")
 

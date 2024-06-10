@@ -1,8 +1,9 @@
-# Bazel Rust Example 
+# Bazel Rust Example
 
 Example of how to build a mini Rust monorepo using Bazel.
 
 The project covers quite a bit of groundwork:
+
 * Cargo & Bazel config side by side
 * Bazel direct dependencies (not generated from Cargo.toml)
 * Builds proto bindings for gRPC with prost
@@ -11,7 +12,7 @@ The project covers quite a bit of groundwork:
 * Builds and tags OCI images docker-less (I wrote some custom macros to simplify these tasks)
 
 Publishing the container image to a container registry, however, is disabled until the target registry is configured.
-Please run `make release` to see details which config to update. 
+Please run `make release` to see details which config to update.
 
 ## Requirements
 
@@ -33,7 +34,6 @@ that abstracts over Bazel and Cargo to simplify working on the repo.
     make rebuild        Sync dependencies and builds the code base from scratch (slow).
     make release        Build & test binaries and then build & publish container images (slow).
     make container      Build the container images.
-    make doc            Build documentation for the project.
     make fix            Fix linting issues as reported by clippy.
     make format         Format call code according to cargo fmt style.
     make test           Test all crates.
