@@ -18,11 +18,6 @@ build --symlink_prefix=target-bzl/
 test --test_output=errors
 test --verbose_failures
 
-# Disable MODULE for the time being.
-# Migrate all dependencies from WORKSPACE to MODULE.bazel
-# https://github.com/bazelbuild/rules_rust/issues/2181
-common --noenable_bzlmod
-
 # Enable misc. performance optimizations.
 # https://www.buildbuddy.io/blog/debugging-slow-bazel-builds/
 # https://www.buildbuddy.io/blog/how-bazel-7-0-makes-your-builds-faster/

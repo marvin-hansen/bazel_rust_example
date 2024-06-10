@@ -18,7 +18,7 @@ bazel_dep(name = "protobuf", version = "27.0")
 # https://github.com/bazel-contrib/rules_oci/releases
 bazel_dep(name = "rules_oci", version = "1.7.6")
 # https://github.com/bazelbuild/rules_pkg/releases
-bazel_dep(name = "rules_pkg", version = "1.0.0")
+bazel_dep(name = "rules_pkg", version = "0.10.1")
 
 ###############################################################################
 # T O O L C H A I N S
@@ -27,11 +27,9 @@ bazel_dep(name = "rules_pkg", version = "1.0.0")
 rust = use_extension("//rust:extensions.bzl", "rust")
 rust.toolchain(edition = "2021")
 use_repo(rust, "rust_toolchains")
-register_toolchains(@rust_toolchains//:all")
-
+register_toolchains("@rust_toolchains//:all")
 # Proto toolchain
-register_toolchains("//proto/protobuf:default-proto-toolchain")
-
+# register_toolchains("//proto/protobuf:default-proto-toolchain")
 # Prost toolchain
 register_toolchains("//proto/prost:default_prost_toolchain")
 
@@ -52,43 +50,13 @@ use_repo(oci, "distroless")
 # R U S T  C R A T E S
 ###############################################################################
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
-crate.spec(
-    package = "jemallocator",
-    version = "0.5.4",
-)
-
-crate.spec(
-    package = "mimalloc",
-    version = "0.1.42",
-)
-
-crate.spec(
-    package = "prost",
-    version = "0.12",
-)
-
-crate.spec(
-    package = "tonic",
-    features = ["transport"],
-    version = "0.11",
-)
-
-crate.spec(
-    package = "tonic-build",
-    version = "0.11",
-)
-
-crate.spec(
-    package = "tonic-health",
-    features = ["transport"],
-    version = "0.11",
-)
-
-crate.spec(
-    package = "tokio",
-    features =  ["macros", "net", "rt-multi-thread", "signal"],
-    version = "1.38",
-)
+crate.spec(package = "jemallocator", version = "0.5.4")
+crate.spec(package = "mimalloc", version = "0.1.42")
+crate.spec(package = "prost", version = "0.12")
+crate.spec(package = "tonic",features = ["transport"], version = "0.11")
+crate.spec(package = "tonic-build", version = "0.11")
+crate.spec(package = "tonic-health", features = ["transport"], version = "0.11")
+crate.spec(package = "tokio", features = ["macros", "net", "rt-multi-thread", "signal"], version = "1.38")
 
 crate.from_specs()
 use_repo(crate, "crate_index")
