@@ -1,8 +1,7 @@
 module(name = "bazel_rust_example")
 
 ###############################################################################
-# Bazel Central Registry
-# https://registry.bazel.build/
+# B A Z E L  C E N T R A L  R E G I S T R Y
 ###############################################################################
 # https://github.com/bazelbuild/bazel-skylib/releases/
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
@@ -18,22 +17,8 @@ bazel_dep(name = "rules_proto", version = "5.3.0-21.7")
 bazel_dep(name = "protobuf", version = "27.0")
 # https://github.com/bazel-contrib/rules_oci/releases
 bazel_dep(name = "rules_oci", version = "1.7.6")
-
-###############################################################################
-#  O C I  I M A G E
-###############################################################################
-oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
-
-# Declare external images you need to pull, for example:
-oci.pull(
-    name = "distroless",
-    digest = "sha256:e1065a1d58800a7294f74e67c32ec4146d09d6cbe471c1fa7ed456b2d2bf06e0",
-    image = "gcr.io/distroless/cc-debian12",
-    platforms = ["linux/amd64", "linux/arm64/v8"],
-)
-
-# For each oci.pull call, repeat the "name" here to expose them as dependencies.
-use_repo(oci, "distroless")
+# https://github.com/bazelbuild/rules_pkg/releases
+bazel_dep(name = "rules_pkg", version = "1.0.0")
 
 ###############################################################################
 # T O O L C H A I N S
@@ -47,8 +32,8 @@ register_toolchains(
 )
 
 # No idea if bootstrap is actually needed.
-# cargo_bazel_bootstrap = use_extension("//crate_universe/private/module_extensions:cargo_bazel_bootstrap.bzl", "cargo_bazel_bootstrap")
-# use_repo(cargo_bazel_bootstrap, "cargo_bazel_bootstrap")
+cargo_bazel_bootstrap = use_extension("//crate_universe/private/module_extensions:cargo_bazel_bootstrap.bzl", "cargo_bazel_bootstrap")
+use_repo(cargo_bazel_bootstrap, "cargo_bazel_bootstrap")
 
 register_toolchains(
     "//proto/protobuf:default-proto-toolchain",
@@ -59,5 +44,59 @@ register_toolchains(
 )
 
 ###############################################################################
+#  O C I  I M A G E
+###############################################################################
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "distroless",
+    digest = "sha256:e1065a1d58800a7294f74e67c32ec4146d09d6cbe471c1fa7ed456b2d2bf06e0",
+    image = "gcr.io/distroless/cc-debian12",
+    platforms = ["linux/amd64", "linux/arm64/v8"],
+)
+
+use_repo(oci, "distroless")
+
+###############################################################################
 # R U S T  C R A T E S
 ###############################################################################
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+crate.spec(
+    package = "jemallocator",
+    version = "0.5.4",
+)
+
+crate.spec(
+    package = "mimalloc",
+    version = "0.1.42",
+)
+
+crate.spec(
+    package = "prost",
+    version = "0.12",
+)
+
+crate.spec(
+    package = "tonic",
+    features = ["transport"],
+    version = "0.11",
+)
+
+crate.spec(
+    package = "tonic-build",
+    version = "0.11",
+)
+
+crate.spec(
+    package = "tonic-health",
+    features = ["transport"],
+    version = "0.11",
+)
+
+crate.spec(
+    package = "tokio",
+    features =  ["macros", "net", "rt-multi-thread", "signal"],
+    version = "1.38",
+)
+
+crate.from_specs()
+use_repo(crate, "crate_index")

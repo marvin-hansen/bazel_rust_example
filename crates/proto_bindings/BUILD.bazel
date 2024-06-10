@@ -1,4 +1,4 @@
-load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_rust//rust:defs.bzl", "proto_library")
 load("@rules_rust//proto/prost:defs.bzl", "rust_prost_library")
 
 
