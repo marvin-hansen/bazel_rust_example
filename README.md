@@ -85,7 +85,7 @@ structure, you have to edit the "--symlink_prefix" setting in the .bazelrc file.
 ### MODULE.bazel (ex. WORKSPACE)
 
 One major weakness of the previous WORKSPACE format was that it used a very complicated and verbose syntax, resulting in
-very large config files that are hard to maintain over time. There were many more issues, but most boiled down to
+very large config files that are hard to maintain. There were many more issues, but most boiled down to
 maintainability.The new MODULE file indeed simplifies a lot. Conventionally you configure at least three sections for a
 Rust project and then some custom tools. Specifically, you need:
 
@@ -96,9 +96,10 @@ Rust project and then some custom tools. Specifically, you need:
 In addition, this project also configures rules_oci to build and publish container images without Docker.
 
 Bazel builds many different programming languages and to support any particular languages
-you need to add something similar to a plugin, which are called rules in Bazel. However, rules not only build a specific
-programming language, but also provide utils, or just anything that can be configured as a Bazel target. At a bare
-minimum, you need rules Rust, register the Rust toolchain (that is the compiler and related tools), and load the crate
+you need to add the matching rules in Bazel. However, rules not only build a specific programming language, but also
+provide utils, or just anything that can be configured as a Bazel target. At a bare
+minimum, you need rules to build Rust, register the Rust toolchain (that is the compiler and related tools), and load
+the crate
 universe extension to declare workspace dependencies. A minimal MODULE.bazel is shown below:
 
 ```
