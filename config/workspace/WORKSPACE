@@ -129,7 +129,7 @@ load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencie
 #
 load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository", "render_config")
 crates_repository(
-    name = "crate_index",
+    name = "crates",
     cargo_lockfile = "//:Cargo.lock",
     lockfile = "//:cargo-bazel-lock.json",
     packages = {
@@ -171,5 +171,5 @@ crates_repository(
 
 )
 
-load("@crate_index//:defs.bzl", "crate_repositories")
+load("@crates//:defs.bzl", "crate_repositories")
 crate_repositories()
