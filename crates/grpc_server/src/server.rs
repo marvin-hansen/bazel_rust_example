@@ -26,7 +26,7 @@ impl JobRunner for MyJobRunner {
             .expect("Failed to query database");
 
         let reply = JobReply {
-            message: format!("Hello {}!", request.into_inner().name).into(),
+            message: format!("Hello {}!", request.into_inner().name),
         };
 
         Ok(Response::new(reply))

@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let grpc_svc = JobRunnerServer::new(MyJobRunner::new(dbm));
 
     // Sigint signal handler that closes the DB connection upon shutdown
-    let signal = grpc_sigint(dbm.clone());
+    let signal = grpc_sigint(dbm);
 
     // Build gRPC server with health service and signal sigint handler
     let grpc_server = TonicServer::builder()
