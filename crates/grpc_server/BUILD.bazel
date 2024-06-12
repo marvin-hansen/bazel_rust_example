@@ -35,6 +35,20 @@ rust_binary(
     visibility = ["//visibility:public"],
 )
 
+# Build documentation
+rust_doc(
+    name = "doc",
+    crate = ":bin",
+    visibility = ["//visibility:public"],
+)
+
+# Test documentation
+rust_doc_test(
+     name = "doc_test",
+     crate = ":bin",
+     visibility = ["//visibility:public"],
+ )
+
 # Build container image
 build_image(
     name = "image",

@@ -18,6 +18,15 @@ filegroup(
 
 
 filegroup(
+    name = "doc",
+    srcs = [
+        "//crates:doc",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+filegroup(
     name = "image",
     srcs = [
         "//crates:image",

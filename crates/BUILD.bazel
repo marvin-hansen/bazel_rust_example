@@ -12,13 +12,21 @@ filegroup(
 
 
 filegroup(
+    name = "doc",
+    srcs = [
+        "//crates/grpc_server:doc",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+filegroup(
     name = "image",
     srcs = [
         "//crates/grpc_server:image",
     ],
     visibility = ["//visibility:public"],
 )
-
 
 
 multirun(
