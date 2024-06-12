@@ -28,9 +28,9 @@ rust_binary(
         # Internal crates
         "//crates/proto_bindings:rust_proto",
         # External crates
-        "@crate_index//:prost",
-        "@crate_index//:tokio",
-        "@crate_index//:tonic",
+        "@crates//:prost",
+        "@crates//:tokio",
+        "@crates//:tonic",
     ],
     visibility = ["//visibility:public"],
 )
