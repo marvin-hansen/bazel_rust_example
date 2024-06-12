@@ -9,15 +9,20 @@ authors.workspace = true
 
 
 [[bin]]
-name = "grpc_server"
-path = "src/main.rs"
+name = "client"
+path = "src/bin/client/main.rs"
+
+
+[[bin]]
+name = "server"
+path = "src/bin/server/main.rs"
 
 
 [dependencies]
 # Internal crates
-proto_bindings =  {workspace = true}
+proto_bindings = { workspace = true }
 # External crates
-prost =  {workspace = true}
-tokio = {workspace = true}
-tonic =  {workspace = true}
+prost = { workspace = true }
+tokio = { workspace = true }
+tonic = { workspace = true }
 

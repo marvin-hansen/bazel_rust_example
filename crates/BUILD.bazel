@@ -4,7 +4,8 @@ load("@rules_multirun//:defs.bzl", "command", "multirun")
 filegroup(
     name = "build",
     srcs = [
-        "//crates/grpc_server:bin",
+        "//crates/grpc_server:client",
+        "//crates/grpc_server:server",
         "//crates/proto_bindings:proto_bindings",
     ],
     visibility = ["//visibility:public"],
@@ -14,7 +15,8 @@ filegroup(
 filegroup(
     name = "doc",
     srcs = [
-        "//crates/grpc_server:doc",
+        "//crates/grpc_server:client_doc",
+        "//crates/grpc_server:server_doc",
     ],
     visibility = ["//visibility:public"],
 )

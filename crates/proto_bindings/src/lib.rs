@@ -1,3 +1,3 @@
-pub mod job {
-    tonic::include_proto!("job");
+pub mod proto {
+    tonic::include_proto!("proto");
 }

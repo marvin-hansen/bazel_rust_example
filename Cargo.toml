@@ -26,18 +26,18 @@ proto_bindings = { path = "crates/proto_bindings" }
 # ==============
 # Custom Memory Allocator
 # ==============
-jemallocator = {version = "0.5.4"}
+jemallocator = { version = "0.5.4" }
 mimalloc = { version = "0.1.42" }
 #
 # ==============
 # External crates
 # ==============
 #
-prost = {version = "0.12"}
-tokio = { version = "1.38", default-features = false,  features = ["macros", "net", "rt-multi-thread", "signal"] }
-tonic = { version = "0.11", features = ["transport"]}
+prost = { version = "0.12" }
+tonic = { version = "0.11", features = ["transport"] }
 tonic-build = "0.11"
-tonic-health = { version = "0.11", default-features = false, features = ["transport"]}
+tonic-health = { version = "0.11", default-features = false, features = ["transport"] }
+tokio = { version = "1.38", default-features = false, features = ["macros", "net", "rt-multi-thread", "signal"] }
 
 
 # Optimize all crates

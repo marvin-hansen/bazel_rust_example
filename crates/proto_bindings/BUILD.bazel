@@ -5,7 +5,7 @@ load("@rules_rust//proto/prost:defs.bzl", "rust_prost_library")
 proto_library(
     name = "proto_bindings",
     srcs = [
-          "proto/job.proto",
+          "proto/helloworld.proto",
     ],
     visibility = ["//visibility:public"],
 )
