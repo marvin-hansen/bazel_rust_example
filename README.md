@@ -16,9 +16,6 @@ The project covers quite a bit of groundwork:
 Publishing the container image to a container registry, however, is disabled until the target registry is configured.
 Please run `make release` to see details which config to update.
 
-Note, Bazel does not have the concept or a crate, therefore all dependencies declared in Bazel work similar to workspace
-dependencies in Cargo as they can be used in any target within the entire Bazel project.
-
 ## Requirements
 
 * Cargo & Rust
@@ -48,13 +45,10 @@ The scripts called by each make command are located in the [script folder.](scri
 
 ## Bazelmod support
 
-The Bazel project decided a while ago to change the main configuration from the previous
-WORKSPACE format to the current MODULE (a.k.a bazelmod) format. Since Bazel 7, the bazelmod format has been set as the
-new default. Converting a WORKSPACE configuration into a correct bazelmod takes a non-trivial amount of effort
-especially the more bazel rules are used in a project.
-
-This demo project uses the current bazelmod by default, but also comes with a working
-WORKSPACE configuration. This may help those who try to convert an existing Bazel project to the new bazelmod format.
+A while ago, the Bazel project decided to change the main configuration from the previous WORKSPACE format to the
+current MODULE a.k.a bazelmod) format. Since Bazel 7, the bazelmod format has been set as the new default. This demo
+project uses the current bazelmod by default and has a working WORKSPACE configuration. This may help those who are
+trying to convert an existing Bazel project to the new Bazelmod format.
 
 ## Bazel configuration
 
@@ -89,12 +83,10 @@ structure, you have to edit the "--symlink_prefix" setting in the .bazelrc file.
 
 ### MODULE.bazel (ex. WORKSPACE)
 
-One major weakness of the previous WORKSPACE format was that it used a very complicated and verbose syntax that resulted
-in very large config files that are hard to maintain over time. There were a lot more issues, but most of them boiled
-down to maintainability.
-The new MODULE file indeed simplifies a lot. Conventionally, you need to configure at least three section for a Rust
-project and then some custom tools.
-Specifically, you need:
+One major weakness of the previous WORKSPACE format was that it used a very complicated and verbose syntax, resulting in
+very large config files that are hard to maintain over time. There were many more issues, but most boiled down to
+maintainability.The new MODULE file indeed simplifies a lot. Conventionally you configure at least three sections for a
+Rust project and then some custom tools. Specifically, you need:
 
 1) Bazel build rules from the Bazel Central Registry.
 2) Toolchains, at least the Rust toolchain is required
