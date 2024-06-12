@@ -24,12 +24,18 @@ bazel_dep(name = "protobuf", version = "27.0", repo_name = "com_google_protobuf"
 # T O O L C H A I N S
 ###############################################################################
 # Rust toolchain
+RUST_EDITION = "2021"
+RUST_VERSION = "1.78.0"
+#
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(edition = "2021")
+rust.toolchain(edition = RUST_EDITION, versions = [RUST_VERSION])
 use_repo(rust, "rust_toolchains")
-
 register_toolchains("@rust_toolchains//:all")
+
+# Proto toolchain
 register_toolchains("@rules_rust//proto/protobuf:default-proto-toolchain")
+
+# Prost toolchain
 register_toolchains("@rules_rust//proto/prost:default_prost_toolchain")
 
 ###############################################################################
@@ -48,10 +54,9 @@ use_repo(oci, "distroless")
 # R U S T  C R A T E S
 ###############################################################################
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
-crate.spec(package = "jemallocator", version = "0.5.4")
-crate.spec(package = "mimalloc", version = "0.1.42")
+# External crates
 crate.spec(package = "prost", version = "0.12")
-crate.spec(package = "tonic",features = ["transport"], version = "0.11")
+crate.spec(package = "tonic", features = ["transport"], version = "0.11")
 crate.spec(package = "tonic-build", version = "0.11")
 crate.spec(package = "tonic-health", features = ["transport"], version = "0.11")
 crate.spec(package = "tokio", features = ["macros", "net", "rt-multi-thread", "signal"], version = "1.38")
