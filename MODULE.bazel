@@ -2,11 +2,12 @@ module(name = "bazel_rust_example")
 
 ###############################################################################
 # B A Z E L  C E N T R A L  R E G I S T R Y
+# https://registry.bazel.build/
 ###############################################################################
 # https://github.com/bazelbuild/bazel-skylib/releases/
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 # https://github.com/bazelbuild/rules_rust/releases
-bazel_dep(name = "rules_rust", version = "0.45.1")
+bazel_dep(name = "rules_rust", version = "0.46.0")
 # https://github.com/aspect-build/bazel-lib/releases
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
 # https://github.com/keith/rules_multirun/releases
@@ -14,7 +15,7 @@ bazel_dep(name = "rules_multirun", version = "0.9.0")
 # https://github.com/bazelbuild/rules_proto/releases
 bazel_dep(name = "rules_proto", version = "5.3.0-21.7")
 # https://github.com/protocolbuffers/protobuf/releases
-bazel_dep(name = "protobuf", version = "27.0")
+bazel_dep(name = "protobuf", version = "21.7")
 # https://github.com/bazel-contrib/rules_oci/releases
 bazel_dep(name = "rules_oci", version = "1.7.6")
 # https://github.com/bazelbuild/rules_pkg/releases
@@ -24,14 +25,21 @@ bazel_dep(name = "rules_pkg", version = "0.10.1")
 # T O O L C H A I N S
 ###############################################################################
 # Rust toolchain
-rust = use_extension("//rust:extensions.bzl", "rust")
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(edition = "2021")
 use_repo(rust, "rust_toolchains")
-register_toolchains("@rust_toolchains//:all")
-# Proto toolchain
-register_toolchains("//proto/protobuf:default-proto-toolchain")
-# Prost toolchain
-register_toolchains("//proto/prost:default_prost_toolchain")
+
+register_toolchains(
+    "@rust_toolchains//:all"
+)
+
+register_toolchains(
+    "//proto/protobuf:default-proto-toolchain",
+)
+
+register_toolchains(
+    "//proto/prost:default_prost_toolchain",
+)
 
 ###############################################################################
 #  O C I  I M A G E
