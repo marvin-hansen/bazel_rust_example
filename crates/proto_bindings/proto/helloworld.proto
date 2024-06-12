@@ -14,6 +14,7 @@
 
 syntax = "proto3";
 
+// https://github.com/hyperium/tonic/blob/master/examples/proto/helloworld/helloworld.proto
 package proto;
 
 // The greeting service definition.

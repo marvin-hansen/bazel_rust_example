@@ -1,10 +1,11 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test", "rust_test_suite")
 # OCI Container Rules
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
 # Custom container macro
 load("//:build_image.bzl", "build_image", "build_tag")
 
 # Build binary
+# https://bazelbuild.github.io/rules_rust/defs.html#rust_binary
 rust_binary(
     name = "server",
     crate_root = "src/bin/server/main.rs",
@@ -37,6 +38,7 @@ rust_binary(
 
 
 # Build documentation
+# https://bazelbuild.github.io/rules_rust/rust_doc.html
 rust_doc(
     name = "server_doc",
     crate = ":server",
@@ -44,6 +46,7 @@ rust_doc(
 )
 
 # Test documentation
+# https://bazelbuild.github.io/rules_rust/rust_doc.html#rust_doc_test
 rust_doc_test(
      name = "server_doc_test",
      crate = ":server",
@@ -52,6 +55,7 @@ rust_doc_test(
 
 
 # Build binary
+# https://bazelbuild.github.io/rules_rust/defs.html#rust_binary
 rust_binary(
     name = "client",
     crate_root = "src/bin/client/main.rs",
@@ -83,6 +87,7 @@ rust_binary(
 )
 
 # Build documentation
+# https://bazelbuild.github.io/rules_rust/rust_doc.html
 rust_doc(
     name = "client_doc",
     crate = ":client",
@@ -90,13 +95,30 @@ rust_doc(
 )
 
 # Test documentation
+# https://bazelbuild.github.io/rules_rust/rust_doc.html#rust_doc_test
 rust_doc_test(
      name = "client_doc_test",
      crate = ":client",
      visibility = ["//visibility:public"],
  )
 
+rust_test_suite(
+    name = "demo_tests",
+    srcs = glob([
+        "tests/*_tests.rs",
+    ]),
+    deps = [
+      # Crate to test
+      "//crates/proto_bindings:rust_proto",
+      # External crates
+
+    ],
+    tags = ["unit","common"],
+    visibility = ["//visibility:public"],
+)
+
 # Build container image for server
+# This is a custom macro defined in build_image.bzl in the project root folder
 build_image(
     name = "image",
     srcs = [":server"],
@@ -105,6 +127,7 @@ build_image(
 )
 
 # Build an unique and immutable image tag based on the image SHA265 digest.
+# This is a custom macro defined in build_image.bzl in the project root folder
 build_tag(
     name = "remote_tag",
     image = ":image",
@@ -113,6 +136,7 @@ build_tag(
 )
 
 # Publish image to registry
+# https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md
 oci_push(
     name = "push",
     image = ":image",

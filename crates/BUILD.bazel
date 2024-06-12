@@ -6,7 +6,7 @@ filegroup(
     srcs = [
         "//crates/grpc_server:client",
         "//crates/grpc_server:server",
-        "//crates/proto_bindings:proto_bindings",
+        "//crates/proto_bindings:rust_proto",
     ],
     visibility = ["//visibility:public"],
 )

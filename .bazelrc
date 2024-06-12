@@ -7,7 +7,7 @@ startup --windows_enable_symlinks
 build:windows --enable_runfiles
 
 # Don't create bazel-* symlinks in the WORKSPACE directory.
-# Instead, set a prefix and put it in .gitignore
+# Instead, set a prefix and put target-bzl/ in .gitignore
 build --symlink_prefix=target-bzl/
 
 # Non-empty glob isn't currently the default in Bazel,
