@@ -45,7 +45,7 @@ The scripts called by each make command are located in the [script folder.](scri
 
 ## Bazelmod support
 
-A while ago, the Bazel project decided to change the main configuration from the previous WORKSPACE format to the
+The Bazel project decided to change the main configuration from the previous WORKSPACE format to the
 current MODULE a.k.a bazelmod) format. Since Bazel 7, the bazelmod format has been set as the new default. This demo
 project uses the current bazelmod by default and has a working WORKSPACE configuration. This may help those who are
 trying to convert an existing Bazel project to the new Bazelmod format.
