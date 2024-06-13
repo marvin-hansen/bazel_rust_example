@@ -82,11 +82,11 @@ enables some Rust tools. By default, Bazel generates 3 to 4 folders, but these h
 *target-bzl/** so that it sits right next to the **target/** folder of cargo. If you want a different output folder
 structure, you have to edit the "--symlink_prefix" setting in the .bazelrc file.
 
-### MODULE.bazel (ex. WORKSPACE)
+### MODULE.bazel
 
-One major weakness of the previous WORKSPACE format was that it used a very complicated and verbose syntax, resulting in
-very large config files that are hard to maintain. There were many more issues, but most boiled down to
-maintainability.The new MODULE file indeed simplifies a lot. Conventionally you configure at least three sections for a
+The previous WORKSPACE format suffered from multiple issues, but most boiled down to low maintainability due to
+complex workarounds, [as explained on the Bazel website](https://bazel.build/external/overview#workspace-shortcomings).
+The new MODULE file indeed simplifies a lot. Conventionally you configure at least three sections for a
 Rust project and then some custom tools. Specifically, you need:
 
 1) Bazel build rules from the Bazel Central Registry.
@@ -130,6 +130,19 @@ In general, Github pages of most Bazel rules put code snippets on their release 
 show how to configure Bazel to use them, which is important for toolchains as these usually
 require some configuration. Thus project, for example, configures the protobuf toolchain to compile proto files and the
 prost toolchain to generate Rust bindings for those proto files.
+
+### WORKSPACE Migration
+
+There are cases when rules have not yet been updated for the new Bazelmod format or sometimes complex custom rules
+are used that take more time to migrate. In this case, you can apply
+the [hybrid mode](https://bazel.build/external/migration#hybrid-mode)
+by already using the new MODULE.bazel
+config format while using a dedicated WORKSPACE.bazelmod file for those rules that have not been updated. While this
+project only uses rules that are available for the new Bazelmod format,
+an [example WORKSPACE.bazelmod](WORKSPACE.bzlmod)
+with the BuildBuddy rules has been added. Over time, you can migrate one rule from the
+WORKSPACE.bazelmod file to the MODULE.bazel and eventually delete the WORKSPACE.bazelmod file when its not needed
+anymore. Please read the [official migration guide for details](https://bazel.build/external/migration).
 
 ### Root BUILD.bazel
 

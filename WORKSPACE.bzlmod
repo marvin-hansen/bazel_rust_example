@@ -8,6 +8,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 ###############################################################################
 # BuildBuddy Toolchain
+#
+# Not yet available for Bazelmod.
+# See: https://github.com/buildbuddy-io/buildbuddy-toolchain/issues/18
+#
 # Releases: https://github.com/buildbuddy-io/buildbuddy-toolchain/
 ###############################################################################
 http_archive(
