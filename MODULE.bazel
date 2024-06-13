@@ -17,16 +17,14 @@ bazel_dep(name = "rules_oci", version = "1.7.6")
 bazel_dep(name = "rules_pkg", version = "0.10.1")
 # https://github.com/bazelbuild/rules_proto/releases
 bazel_dep(name = "rules_proto", version = "6.0.0")
-# https://github.com/protocolbuffers/protobuf/releases
-bazel_dep(name = "protobuf", version = "27.0", repo_name = "com_google_protobuf")
 
 ###############################################################################
 # T O O L C H A I N S
 ###############################################################################
-# Rust toolchain
 RUST_EDITION = "2021"
 RUST_VERSION = "1.78.0"
-#
+
+# Rust toolchain
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(edition = RUST_EDITION, versions = [RUST_VERSION])
 use_repo(rust, "rust_toolchains")
@@ -58,8 +56,8 @@ crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 crate.spec(package = "prost", version = "0.12")
 crate.spec(package = "tonic", features = ["transport"], version = "0.11")
 crate.spec(package = "tonic-build", version = "0.11")
-crate.spec(package = "tonic-health", features = ["transport"], version = "0.11")
-crate.spec(package = "tokio", features = ["macros", "net", "rt-multi-thread", "signal"], version = "1.38")
+crate.spec(package = "tonic-health", default_features=False, features = ["transport"], version = "0.11")
+crate.spec(package = "tokio", default_features=False, features = ["macros", "net", "rt-multi-thread", "signal"], version = "1.38")
 
 crate.from_specs()
 use_repo(crate, "crates")
