@@ -108,10 +108,12 @@ universe extension to declare workspace dependencies. A minimal MODULE.bazel is 
 bazel_dep(name = "rules_rust", version = "0.46.0")
 
 # T O O L C H A I N S
+# Rust toolchain
+RUST_EDITION = "2021"
+RUST_VERSION = "1.78.0"
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(edition = "2021")
+rust.toolchain(edition = RUST_EDITION, versions = [RUST_VERSION])
 use_repo(rust, "rust_toolchains")
-
 register_toolchains("@rust_toolchains//:all")
 
 # R U S T  C R A T E S
