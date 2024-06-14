@@ -10,7 +10,7 @@ config_setting(
 filegroup(
     name = "image",
     srcs = [
-        "//crates:image",
+        "//grpc_server:image",
     ],
     visibility = ["//visibility:public"],
 )
@@ -27,6 +27,6 @@ multirun(
 
 command(
     name = "push_images",
-    command = "//crates:push",
+    command =  "//grpc_server:push",
     arguments = [], # Optional arguments passed directly to the tool
 )

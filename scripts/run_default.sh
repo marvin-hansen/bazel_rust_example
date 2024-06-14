@@ -4,4 +4,4 @@ set -o nounset
 set -o pipefail
 
 # Run default target
-command bazel run //crates/grpc_server:server
+command bazel run //grpc_server:server

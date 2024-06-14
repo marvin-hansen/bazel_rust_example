@@ -28,7 +28,7 @@ rust_binary(
     }),
     deps = [
         # Internal crates
-        "//crates/proto_bindings:rust_proto",
+        "//proto_bindings:rust_proto",
         # External crates
         "@crates//:tokio",
         "@crates//:tonic",

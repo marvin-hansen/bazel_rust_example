@@ -2,9 +2,9 @@
 resolver = "2"
 
 members = [
-    "crates/proto_bindings",
-    "crates/grpc_server",
-    "crates/hello_cross", "crates/grpc_client",
+    "proto_bindings",
+    "grpc_server",
+    "hello_cross", "grpc_client",
 ]
 
 
@@ -19,7 +19,7 @@ authors = ["Marvin Hansen <marvin.hansen@gmail.com>"]
 [workspace.dependencies]
 
 # Internal crates
-proto_bindings = { path = "crates/proto_bindings" }
+proto_bindings = { path = "proto_bindings" }
 # Custom Memory Allocator
 jemallocator = { version = "0.5.4" }
 # External crates

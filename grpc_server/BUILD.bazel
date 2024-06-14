@@ -29,7 +29,7 @@ rust_binary(
         # Custom Memory Allocator
         "@crates//:jemallocator",
         # Internal crates
-        "//crates/proto_bindings:rust_proto",
+        "//proto_bindings:rust_proto",
         # External crates
         "@crates//:tokio",
         "@crates//:tonic",
@@ -61,7 +61,7 @@ rust_test_suite(
     ]),
     deps = [
       # Crate to test
-      "//crates/proto_bindings:rust_proto",
+      "//proto_bindings:rust_proto",
       # External crates
     ],
     tags = ["unit","common"],
