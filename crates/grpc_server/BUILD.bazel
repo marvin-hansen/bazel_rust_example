@@ -26,10 +26,11 @@ rust_binary(
         ],
     }),
     deps = [
+        # Custom Memory Allocator
+        "@crates//:jemallocator",
         # Internal crates
         "//crates/proto_bindings:rust_proto",
         # External crates
-        "@crates//:prost",
         "@crates//:tokio",
         "@crates//:tonic",
     ],
@@ -79,7 +80,6 @@ rust_binary(
         # Internal crates
         "//crates/proto_bindings:rust_proto",
         # External crates
-        "@crates//:prost",
         "@crates//:tokio",
         "@crates//:tonic",
     ],

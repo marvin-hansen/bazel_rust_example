@@ -1,10 +1,14 @@
 use std::error::Error;
 
+use jemallocator::Jemalloc;
 use tonic::transport::Server;
 
 use proto_bindings::proto::greeter_server::GreeterServer;
 
 use crate::server::MyGreeter;
+
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
 
 mod server;
 mod shutdown_utils;

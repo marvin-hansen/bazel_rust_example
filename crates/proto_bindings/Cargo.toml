@@ -14,11 +14,10 @@ path = "src/lib.rs"
 
 
 [dependencies]
-# External crates
-prost =  {workspace = true}
-tokio = {workspace = true}
-tonic =  {workspace = true}
-tonic-health =  {workspace = true}
+tokio = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+
 
 [build-dependencies]
-tonic-build = {workspace = true}
+tonic-build = { workspace = true }

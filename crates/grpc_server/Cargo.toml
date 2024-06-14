@@ -19,6 +19,9 @@ path = "src/bin/server/main.rs"
 
 
 [dependencies]
+# Custom Memory Allocator
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+jemallocator = { workspace = true }
 # Internal crates
 proto_bindings = { workspace = true }
 # External crates
