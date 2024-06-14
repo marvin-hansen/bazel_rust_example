@@ -23,10 +23,10 @@ proto_bindings = { path = "crates/proto_bindings" }
 # Custom Memory Allocator
 jemallocator = { version = "0.5.4" }
 # External crates
-prost = { version = "0.12" }
-prost-types = { version = "0.12", default-features = false }
-tonic = { version = "0.11", features = ["transport"] }
-tonic-build = "0.11"
+prost = { version = "0.12.6" }
+prost-types = { version = "0.12.6", default-features = false }
+tonic = { version = "0.11.0", features = ["transport"] }
+tonic-build = "0.11.0"
 tokio = { version = "1.38", default-features = false, features = ["macros", "net", "rt-multi-thread", "signal"] }
 
 

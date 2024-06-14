@@ -31,10 +31,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let grpc_handle = tokio::spawn(grpc_server);
 
+    println!("GreeterServer listening on {}", addr);
     match tokio::try_join!(grpc_handle) {
-        Ok(_) => {
-            println!("GreeterServer listening on {}", addr);
-        }
+        Ok(_) => {}
         Err(e) => {
             println!("[Server]: Error: Failed to start gRPC Greeter server.");
             println!("[Server]: Error: {:?}", e);

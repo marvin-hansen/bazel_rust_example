@@ -17,6 +17,8 @@ bazel_dep(name = "rules_oci", version = "1.7.6")
 bazel_dep(name = "rules_pkg", version = "0.10.1")
 # https://github.com/bazelbuild/rules_proto/releases
 bazel_dep(name = "rules_proto", version = "6.0.0.bcr.1")
+# https://github.com/aspect-build/toolchains_protoc/releases
+bazel_dep(name = "toolchains_protoc", version = "0.3.1")
 
 # Dependencies for cross compilation
 # https://github.com/bazel-contrib/musl-toolchain/releases
@@ -42,7 +44,7 @@ register_toolchains("@llvm_toolchain//:all")
 
 # Rust toolchain
 RUST_EDITION = "2021"
-RUST_VERSION = "1.79.0"
+RUST_VERSION = "1.78.0"
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
@@ -81,10 +83,10 @@ crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 # Custom Memory Allocator
 crate.spec(package = "jemallocator", version = "0.5.4")
 # External crates
-crate.spec(package = "prost", version = "0.12")
-crate.spec(package = "prost-types", default_features=False, version = "0.12")
-crate.spec(package = "tonic", features = ["transport"], version = "0.11")
-crate.spec(package = "tonic-build", version = "0.11")
+crate.spec(package = "prost", version = "0.12.6")
+crate.spec(package = "prost-types", default_features=False, version = "0.12.6")
+crate.spec(package = "tonic", features = ["transport"], version = "0.11.0")
+crate.spec(package = "tonic-build", version = "0.11.0")
 crate.spec(package = "tokio", default_features=False, features = ["macros", "net", "rt-multi-thread", "signal"], version = "1.38")
 
 crate.from_specs()
