@@ -16,9 +16,9 @@ mod shutdown_utils;
 // https://github.com/hyperium/tonic/blob/master/examples/src/helloworld/server.rs
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let addr = "[::1]:50051"
+    let addr = "[::1]:5042"
         .parse()
-        .expect("Failed to parse socket address");
+        .expect("[Server]: Failed to parse socket address");
 
     let grpc_svc = GreeterServer::new(MyGreeter::new());
 
@@ -31,11 +31,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let grpc_handle = tokio::spawn(grpc_server);
 
-    println!("GreeterServer listening on {}", addr);
     match tokio::try_join!(grpc_handle) {
-        Ok(_) => {}
+        Ok(_) => {
+            println!("GreeterServer listening on {}", addr);
+        }
         Err(e) => {
-            println!("Failed to start gRPC Greeter server: {:?}", e);
+            println!("[Server]: Error: Failed to start gRPC Greeter server.");
+            println!("[Server]: Error: {:?}", e);
         }
     }
 
