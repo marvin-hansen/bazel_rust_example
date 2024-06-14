@@ -2,16 +2,6 @@ load("@rules_multirun//:defs.bzl", "command", "multirun")
 
 
 filegroup(
-    name = "doc",
-    srcs = [
-        "//crates/grpc_server:client_doc",
-        "//crates/grpc_server:server_doc",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-
-filegroup(
     name = "image",
     srcs = [
         "//crates/grpc_server:image",

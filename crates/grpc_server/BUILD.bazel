@@ -8,9 +8,9 @@ load("//:build_image.bzl", "build_image", "build_tag")
 # https://bazelbuild.github.io/rules_rust/defs.html#rust_binary
 rust_binary(
     name = "server",
-    crate_root = "src/bin/server/main.rs",
+    crate_root = "src/main.rs",
     srcs = glob([
-        "src/bin/server/*.rs",
+        "src/*.rs",
     ]),
     rustc_flags = select({
        "//:release": [
@@ -54,54 +54,6 @@ rust_doc_test(
      visibility = ["//visibility:public"],
  )
 
-
-# Build binary
-# https://bazelbuild.github.io/rules_rust/defs.html#rust_binary
-rust_binary(
-    name = "client",
-    crate_root = "src/bin/client/main.rs",
-    srcs = glob([
-        "src/bin/client/*.rs",
-    ]),
-    rustc_flags = select({
-       "//:release": [
-            "-Clto",
-            "-Ccodegen-units=1",
-            "-Cpanic=abort",
-            "-Copt-level=3",
-            "-Cstrip=symbols",
-            ],
-        "//conditions:default":
-        [
-           "-Copt-level=0",
-        ],
-    }),
-    deps = [
-        # Internal crates
-        "//crates/proto_bindings:rust_proto",
-        # External crates
-        "@crates//:tokio",
-        "@crates//:tonic",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-# Build documentation
-# https://bazelbuild.github.io/rules_rust/rust_doc.html
-rust_doc(
-    name = "client_doc",
-    crate = ":client",
-    visibility = ["//visibility:public"],
-)
-
-# Test documentation
-# https://bazelbuild.github.io/rules_rust/rust_doc.html#rust_doc_test
-rust_doc_test(
-     name = "client_doc_test",
-     crate = ":client",
-     visibility = ["//visibility:public"],
- )
-
 rust_test_suite(
     name = "demo_tests",
     srcs = glob([
@@ -111,7 +63,6 @@ rust_test_suite(
       # Crate to test
       "//crates/proto_bindings:rust_proto",
       # External crates
-
     ],
     tags = ["unit","common"],
     visibility = ["//visibility:public"],
@@ -122,7 +73,7 @@ rust_test_suite(
 build_image(
     name = "image",
     srcs = [":server"],
-    exposed_ports = ["5050"],
+    exposed_ports = ["5042"],
     visibility = ["//visibility:public"],
 )
 

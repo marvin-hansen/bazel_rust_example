@@ -1,5 +1,5 @@
 [package]
-name = "grpc_server"
+name = "grpc_client"
 version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
@@ -9,14 +9,11 @@ authors.workspace = true
 
 
 [[bin]]
-name = "server"
+name = "client"
 path = "src/main.rs"
 
 
 [dependencies]
-# Custom Memory Allocator
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
-jemallocator = { workspace = true }
 # Internal crates
 proto_bindings = { workspace = true }
 # External crates
