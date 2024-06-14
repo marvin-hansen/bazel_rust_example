@@ -16,7 +16,6 @@ Cargo.lock
 *.pdb
 
 # Bazel stuff
-MODULE.bazel.lock
 /target-bzl/
 /target-bzl/*
 /target-bzl/*.*

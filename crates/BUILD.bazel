@@ -2,17 +2,6 @@ load("@rules_multirun//:defs.bzl", "command", "multirun")
 
 
 filegroup(
-    name = "build",
-    srcs = [
-        "//crates/grpc_server:client",
-        "//crates/grpc_server:server",
-        "//crates/proto_bindings:rust_proto",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-
-filegroup(
     name = "doc",
     srcs = [
         "//crates/grpc_server:client_doc",

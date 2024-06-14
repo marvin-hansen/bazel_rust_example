@@ -8,14 +8,6 @@ config_setting(
 )
 
 
-filegroup(
-    name = "build",
-    srcs = [
-        "//crates:build",
-    ],
-    visibility = ["//visibility:public"],
-)
-
 
 filegroup(
     name = "doc",

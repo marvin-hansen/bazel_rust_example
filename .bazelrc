@@ -43,6 +43,8 @@ test --verbose_failures
 
 # Enable Bzlmod for every Bazel command
 common --enable_bzlmod
+# Disable WORKSPACE parsing. https://github.com/bazelbuild/bazel/pull/20855
+common --noenable_workspace
 
 # Write build outputs in a platform-specific directory;
 # avoid outputs being wiped and rewritten when switching between platforms.
