@@ -12,6 +12,7 @@ The project covers quite a bit of groundwork:
 * Shares proto definitions between client and server
 * Applies the full-swing of compiler optimization & binary size reduction using pass-through options
 * Builds and tags OCI images docker-less (I wrote some custom macros to simplify these tasks)
+* Cross compile example in the hello-cross crate.
 
 Publishing the container image to a container registry, however, is disabled until the target registry is configured.
 Please run `make release` to see details which config to update.

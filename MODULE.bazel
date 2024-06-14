@@ -17,16 +17,40 @@ bazel_dep(name = "rules_oci", version = "1.7.6")
 bazel_dep(name = "rules_pkg", version = "0.10.1")
 # https://github.com/bazelbuild/rules_proto/releases
 bazel_dep(name = "rules_proto", version = "6.0.0")
+# https://github.com/bazel-contrib/musl-toolchain/releases
+bazel_dep(name = "toolchains_musl", version = "0.1.16", dev_dependency = True)
+# https://github.com/bazelbuild/platforms/releases
+bazel_dep(name = "platforms", version = "0.0.10")
+# https://github.com/bazel-contrib/toolchains_llvm
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
 
 ###############################################################################
 # T O O L C H A I N S
 ###############################################################################
-RUST_EDITION = "2021"
-RUST_VERSION = "1.78.0"
+# LLVM Toolchain
+# rules_rust still needs a cpp toolchain, so provide a cross-compiling one here
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    name = "llvm_toolchain",
+    llvm_version = "16.0.0",
+)
+use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
+
+register_toolchains("@llvm_toolchain//:all")
 
 # Rust toolchain
+RUST_EDITION = "2021"
+RUST_VERSION = "1.79.0"
+
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(edition = RUST_EDITION, versions = [RUST_VERSION])
+rust.toolchain(
+    edition = RUST_EDITION,
+    versions = [RUST_VERSION],
+    extra_target_triples = [
+        "aarch64-unknown-linux-gnu",
+        "x86_64-unknown-linux-gnu",
+    ],
+)
 use_repo(rust, "rust_toolchains")
 register_toolchains("@rust_toolchains//:all")
 

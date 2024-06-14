@@ -1,0 +1,11 @@
+[package]
+name = "hello_cross"
+version = "0.1.0"
+
+edition.workspace = true
+rust-version.workspace = true
+readme.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
