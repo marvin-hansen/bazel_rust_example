@@ -16,7 +16,8 @@ bazel_dep(name = "rules_oci", version = "1.7.6")
 # https://github.com/bazelbuild/rules_pkg/releases
 bazel_dep(name = "rules_pkg", version = "0.10.1")
 # https://github.com/bazelbuild/rules_proto/releases
-bazel_dep(name = "rules_proto", version = "6.0.0")
+bazel_dep(name = "rules_proto", version = "6.0.0.bcr.1")
+
 # https://github.com/bazel-contrib/musl-toolchain/releases
 bazel_dep(name = "toolchains_musl", version = "0.1.16", dev_dependency = True)
 # https://github.com/bazelbuild/platforms/releases
@@ -76,12 +77,19 @@ use_repo(oci, "distroless")
 # R U S T  C R A T E S
 ###############################################################################
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+# Custom Memory Allocator
+crate.spec(package = "jemallocator", version = "0.5.4")
 # External crates
 crate.spec(package = "prost", version = "0.12")
+crate.spec(package = "prost-types", default_features=False, version = "0.12")
 crate.spec(package = "tonic", features = ["transport"], version = "0.11")
 crate.spec(package = "tonic-build", version = "0.11")
 crate.spec(package = "tonic-health", default_features=False, features = ["transport"], version = "0.11")
 crate.spec(package = "tokio", default_features=False, features = ["macros", "net", "rt-multi-thread", "signal"], version = "1.38")
+crate.spec(package = "tokio-cron-scheduler", features = ["signal"], version = "0.10")
+crate.spec(package = "tokio-tungstenite", default_features=False, version = "0.23")
+crate.spec(package = "tokio-timer", version = "0.2")
+crate.spec(package = "warp", version = "0.3")
 
 crate.from_specs()
 use_repo(crate, "crates")
