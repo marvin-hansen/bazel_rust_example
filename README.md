@@ -3,6 +3,9 @@
 Example of how to build a mini Rust monorepo using Bazel based on
 the [hello world Prost gRPC example](https://github.com/hyperium/tonic/blob/master/examples/README.md).
 
+NOTE: The gRPC server binary doesn't execute currently due
+to [issue 2689](https://github.com/bazelbuild/rules_rust/issues/2689).
+
 The project covers quite a bit of groundwork:
 
 * Cargo & Bazel config side by side
