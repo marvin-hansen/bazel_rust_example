@@ -1,6 +1,7 @@
 # Bazel Rust Example
 
 Rust example code configured for Bazel in the new Bazelmod format.
+For an introduction to Rust with Bazelmod, [see this document.](bzlmod.md)
 
 Examples:
 
