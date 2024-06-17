@@ -25,7 +25,7 @@ The project covers quite a bit of groundwork:
 ## Acknowledgement
 
 Special thanks to [Daniel Wagner-Hall](https://github.com/illicitonion) for resolving the prost toolchain issue.
-If you're feeling this repo adds value to your, please
+If you're feeling this repo adds value, please
 consider[ donating to codeyourfuture]( https://codeyourfuture.io/donate/).
 
 ## Requirements
