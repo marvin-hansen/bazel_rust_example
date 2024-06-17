@@ -11,9 +11,6 @@ Examples:
 * [Cross compilation](hello_cross)
 * [Tokio REST API (No Cargo, with container build)](rest_tokio)
 
-NOTE: The gRPC client and server binary don't run currently because
-of [issue 2689](https://github.com/bazelbuild/rules_rust/issues/2689).
-
 The project covers quite a bit of groundwork:
 
 * Cargo & Bazel config side by side
@@ -24,6 +21,12 @@ The project covers quite a bit of groundwork:
 * Applies compiler optimization & binary size reduction using pass-through options
 * Builds and tags OCI images docker-less (See below)
 * Cross compile example in the hello-cross crate.
+
+## Acknowledgement
+
+Special thanks to [Daniel Wagner-Hall](https://github.com/illicitonion) for resolving the prost toolchain issue.
+If you're feeling this repo adds value to your, please
+consider[ donating to codeyourfuture]( https://codeyourfuture.io/donate/).
 
 ## Requirements
 
@@ -83,9 +86,6 @@ because a change of that flag triggers a complete rebuild of the target.
 * **Run grpc client example:** `bazel run //grpc_client:bin`
 * **Run grpc server example:** `bazel run //grpc_server:bin`
 * **Run tokio rest example:**  `bazel run //rest_tokio:bin`
-
-Note: gRPC client & server current throw an error due to a Tokio
-version mismatch. [The underlying issue is under investigation](https://github.com/bazelbuild/rules_rust/issues/2689).
 
 ### Container
 

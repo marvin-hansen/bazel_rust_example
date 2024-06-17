@@ -64,7 +64,7 @@ register_toolchains("@rust_toolchains//:all")
 register_toolchains("@rules_rust//proto/protobuf:default-proto-toolchain")
 
 # Prost toolchain
-register_toolchains("@//prost_toolchain")
+register_toolchains("@//build/prost_toolchain")
 
 ###############################################################################
 #  O C I  I M A G E
@@ -86,12 +86,15 @@ crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 crate.spec(package = "jemallocator", version = "0.5.4")
 #
 # protobufs/gRPC in Rust
-crate.spec(package = "protoc-gen-prost", version = "0.3.1")
-crate.spec(package = "protoc-gen-tonic", version = "0.4.0")
+
 crate.spec(package = "prost", version = "0.12")
 crate.spec(package = "prost-types", default_features = False, version = "0.12")
 crate.spec(package = "tonic", features = ["transport"], version = "0.11")
 crate.spec(package = "tonic-build", version = "0.11")
+crate.spec(package = "protoc-gen-prost", version = "0.3.1")
+crate.annotation(crate = "protoc-gen-prost",gen_binaries = ["protoc-gen-prost"],)
+crate.spec(package = "protoc-gen-tonic", version = "0.4.0")
+crate.annotation(   crate = "protoc-gen-tonic",   gen_binaries = ["protoc-gen-tonic"],)
 #
 # External crates
 crate.spec(package = "arc-swap", version = "1.7")
@@ -100,17 +103,6 @@ crate.spec(package = "serde_json", version = "1.0")
 crate.spec(package = "tokio", default_features=False, features = ["macros", "net", "rt-multi-thread", "signal"], version = "1.38")
 crate.spec(package = "tokio-cron-scheduler", features = ["signal"], version = "0.10")
 crate.spec(package = "warp", version = "0.3")
-
-
-crate.annotation(
-    crate = "protoc-gen-prost",
-    gen_binaries = ["protoc-gen-prost"],
-)
-
-crate.annotation(
-    crate = "protoc-gen-tonic",
-    gen_binaries = ["protoc-gen-tonic"],
-)
 
 crate.from_specs()
 use_repo(crate, "crates")
