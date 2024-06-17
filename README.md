@@ -47,7 +47,8 @@ trying to convert an existing Bazel project from the previous format to the new 
 ### Optimize
 
 Applies compiler optimization similar to the Rust release mode to binaries. These optimization must be defined in each
-binary target. Bazel's `-c opt` flag can be added to any build, test, or run target. However, please be consistent because a change of that flag triggers a complete rebuild of the target. 
+binary target. Bazel's `-c opt` flag can be added to any build, test, or run target. However, please be consistent
+because a change of that flag triggers a complete rebuild of the target.
 
 * **Optimize all binaries:** `bazel build -c opt //...`
 * **Optimize only one example:** `bazel build -c opt //grpc_client:bin`
@@ -75,20 +76,24 @@ version mismatch. [The underlying issue is under investigation](https://github.c
 ### Container
 
 Debug
+
 * **Build all container images in debug mode:** `bazel build//:image`
 * **Push all debug mode images to container registry:** `command bazel run //:push`
 
 Release (optimized) mode
+
 * **Build all container images in release mode:** `bazel build -c opt //:image`
 * **Push all release mode images to container registry:** `command bazel run -c opt //:push`
 
-Note: To enable push to a container registry, you have to configure a container registry for each container. As a side-effect, you can push different containers to different registries. To do so, please edit the push target in the following files:
+Note: To enable push to a container registry, you have to configure a container registry for each container. As a
+side-effect, you can push different containers to different registries. To do so, please edit the push target in the
+following files:
 
 * [gRPC Server/BUILD.bazel](grpc_server/BUILD.bazel)
 * [rest_tokio/BUILD.bazel](rest_tokio/BUILD.bazel)
 
-For details how to configure push, please refer to the [official rules_oci documentation.](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md)
-
+For details how to configure push, please refer to
+the [official rules_oci documentation.](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md)
 
 ## Bazel configuration
 
