@@ -1,5 +1,7 @@
-module(name = "bazel_rust_example")
-
+module(
+    name = "bazel_rust_example",
+    version = "0.0.0"
+)
 ###############################################################################
 # B A Z E L  C E N T R A L  R E G I S T R Y # https://registry.bazel.build/
 ###############################################################################
@@ -86,10 +88,11 @@ use_repo(oci, "distroless")
 # R U S T  C R A T E S
 ###############################################################################
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+#
 # Custom Memory Allocator
 crate.spec(package = "jemallocator", version = "0.5.4")
 #
-# protobufs/gRPC in Rust
+# protobufs / gRPC
 crate.spec(package = "prost", version = "0.12")
 crate.spec(package = "prost-types", default_features = False, version = "0.12")
 crate.spec(package = "tonic", features = ["transport"], version = "0.11")
