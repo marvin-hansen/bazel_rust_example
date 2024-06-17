@@ -1,10 +1,17 @@
 # Bazel Rust Example
 
-Example of how to build a mini Rust monorepo using Bazel based on
-the [hello world Prost gRPC example](https://github.com/hyperium/tonic/blob/master/examples/README.md).
+Rust example code configured for Bazel in the new Bazelmod format.
 
-NOTE: The gRPC server binary doesn't execute currently due
-to [issue 2689](https://github.com/bazelbuild/rules_rust/issues/2689).
+Examples:
+
+* [gRPC Client](grpc_client)
+* [gRRC Server (with container build)](grpc_server)
+* [Proto Prost Bindings](proto_bindings)
+* [Cross compilation](hello_cross)
+* [Tokio REST API (No Cargo, with container build)](rest_tokio)
+
+NOTE: The gRPC client and server binary doesn't run currently because
+of [issue 2689](https://github.com/bazelbuild/rules_rust/issues/2689).
 
 The project covers quite a bit of groundwork:
 
@@ -13,7 +20,7 @@ The project covers quite a bit of groundwork:
 * Builds two crates in a workspace where one depends on the other
 * Builds proto bindings for gRPC with prost
 * Shares proto definitions between client and server
-* Applies the full-swing of compiler optimization & binary size reduction using pass-through options
+* Applies compiler optimization & binary size reduction using pass-through options
 * Builds and tags OCI images docker-less (I wrote some custom macros to simplify these tasks)
 * Cross compile example in the hello-cross crate.
 
@@ -25,6 +32,11 @@ Please run `make release` to see details which config to update.
 * Cargo & Rust
 * C compiler (gcc, or clang)
 * Bazelisk ([Link to installation](https://bazel.build/install/bazelisk))
+* Docker (Optional, see below)
+
+## Container build
+
+Containers are build and published without Docker thanks to [rules_oci](https://github.com/bazel-contrib/rules_oci/tree/main). This is very favorable for CI builds as it accelerates container build times significantly. However, if you want to run these containers locally, you need a Docker installation to pull and run a container image just as you would normally do. Cross compilation binaries don't have container builds, but these can easily be added following the examples given. 
 
 ## Bazelmod support
 
