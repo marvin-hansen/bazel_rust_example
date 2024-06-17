@@ -15,20 +15,24 @@ bazel_dep(name = "rules_multirun", version = "0.9.0")
 bazel_dep(name = "rules_oci", version = "1.7.6")
 # https://github.com/bazelbuild/rules_pkg/releases
 bazel_dep(name = "rules_pkg", version = "0.10.1")
+#
+# Rules for proto
+#
 # https://github.com/bazelbuild/rules_proto/releases
-bazel_dep(name = "rules_proto", version = "6.0.0.bcr.1")
+bazel_dep(name = "rules_proto", version = "6.0.0")
 # https://github.com/aspect-build/toolchains_protoc/releases
 bazel_dep(name = "toolchains_protoc", version = "0.3.1")
-
-# Dependencies for cross compilation
+# https://registry.bazel.build/modules/protobuf
+bazel_dep(name = "protobuf", version = "27.1")
+#
+# Rules for cross compilation
+#
 # https://github.com/bazel-contrib/musl-toolchain/releases
 bazel_dep(name = "toolchains_musl", version = "0.1.16", dev_dependency = True)
 # https://github.com/bazelbuild/platforms/releases
 bazel_dep(name = "platforms", version = "0.0.10")
 # https://github.com/bazel-contrib/toolchains_llvm
 bazel_dep(name = "toolchains_llvm", version = "1.0.0")
-
-bazel_dep(name = "protobuf", version = "27.1")
 
 ###############################################################################
 # T O O L C H A I N S
@@ -86,7 +90,6 @@ crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 crate.spec(package = "jemallocator", version = "0.5.4")
 #
 # protobufs/gRPC in Rust
-
 crate.spec(package = "prost", version = "0.12")
 crate.spec(package = "prost-types", default_features = False, version = "0.12")
 crate.spec(package = "tonic", features = ["transport"], version = "0.11")
