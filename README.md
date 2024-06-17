@@ -10,7 +10,7 @@ Examples:
 * [Cross compilation](hello_cross)
 * [Tokio REST API (No Cargo, with container build)](rest_tokio)
 
-NOTE: The gRPC client and server binary doesn't run currently because
+NOTE: The gRPC client and server binary don't run currently because
 of [issue 2689](https://github.com/bazelbuild/rules_rust/issues/2689).
 
 The project covers quite a bit of groundwork:
@@ -21,11 +21,8 @@ The project covers quite a bit of groundwork:
 * Builds proto bindings for gRPC with prost
 * Shares proto definitions between client and server
 * Applies compiler optimization & binary size reduction using pass-through options
-* Builds and tags OCI images docker-less (I wrote some custom macros to simplify these tasks)
+* Builds and tags OCI images docker-less (See below)
 * Cross compile example in the hello-cross crate.
-
-Publishing the container image to a container registry, however, is disabled until the target registry is configured.
-Please run `make release` to see details which config to update.
 
 ## Requirements
 
@@ -40,7 +37,7 @@ Containers are build and published without Docker thanks
 to [rules_oci](https://github.com/bazel-contrib/rules_oci/tree/main). This is very favorable for CI builds as it
 accelerates container build times significantly. However, if you want to run these containers locally, you need a Docker
 installation to pull and run a container image just as you would normally do. Cross compilation binaries don't have
-container builds, but these can easily be added following the examples given.
+container builds, but these }}can easily be added following the examples given.
 
 ## Bazelmod support
 
