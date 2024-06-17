@@ -28,6 +28,8 @@ bazel_dep(name = "platforms", version = "0.0.10")
 # https://github.com/bazel-contrib/toolchains_llvm
 bazel_dep(name = "toolchains_llvm", version = "1.0.0")
 
+bazel_dep(name = "protobuf", version = "27.1")
+
 ###############################################################################
 # T O O L C H A I N S
 ###############################################################################
@@ -62,7 +64,7 @@ register_toolchains("@rust_toolchains//:all")
 register_toolchains("@rules_rust//proto/protobuf:default-proto-toolchain")
 
 # Prost toolchain
-register_toolchains("@rules_rust//proto/prost:default_prost_toolchain")
+register_toolchains("@//prost_toolchain")
 
 ###############################################################################
 #  O C I  I M A G E
@@ -87,7 +89,7 @@ crate.spec(package = "jemallocator", version = "0.5.4")
 crate.spec(package = "protoc-gen-prost", version = "0.3.1")
 crate.spec(package = "protoc-gen-tonic", version = "0.4.0")
 crate.spec(package = "prost", version = "0.12")
-crate.spec(package = "prost-types",default_features=False, version = "0.12")
+crate.spec(package = "prost-types", default_features = False, version = "0.12")
 crate.spec(package = "tonic", features = ["transport"], version = "0.11")
 crate.spec(package = "tonic-build", version = "0.11")
 #
@@ -99,6 +101,16 @@ crate.spec(package = "tokio", default_features=False, features = ["macros", "net
 crate.spec(package = "tokio-cron-scheduler", features = ["signal"], version = "0.10")
 crate.spec(package = "warp", version = "0.3")
 
+
+crate.annotation(
+    crate = "protoc-gen-prost",
+    gen_binaries = ["protoc-gen-prost"],
+)
+
+crate.annotation(
+    crate = "protoc-gen-tonic",
+    gen_binaries = ["protoc-gen-tonic"],
+)
 
 crate.from_specs()
 use_repo(crate, "crates")
