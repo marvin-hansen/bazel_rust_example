@@ -2,6 +2,19 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 package(default_visibility = ["//visibility:public"])
 
+
+filegroup(
+    name = "bin",
+    srcs = [
+        ":hello_world_x86_64_musl",
+        ":hello_world_linux_arm64_musl",
+        ":hello_world_x86_64",
+        ":hello_world_aarch64",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
 rust_binary(
     name = "hello_world_x86_64_musl",
     srcs = ["src/main.rs"],

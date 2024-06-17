@@ -26,27 +26,6 @@ Please run `make release` to see details which config to update.
 * C compiler (gcc, or clang)
 * Bazelisk ([Link to installation](https://bazel.build/install/bazelisk))
 
-## 🛠️ Cargo, Bazel & Make
-
-Cargo and Bazel work as expected, but in addition, a makefile exists
-that abstracts over Bazel and Cargo to simplify working on the repo.
-
-```bash 
- Run Services:
-    make run            Run the default binary.
-
- Development:
-    make build          Build the code base incrementally (fast) for dev.
-    make rebuild        Sync dependencies and builds the code base from scratch (slow).
-    make release        Build & test binaries and then build & publish container images (slow).
-    make container      Build the container images.
-    make fix            Fix linting issues as reported by clippy.
-    make format         Format call code according to cargo fmt style.
-    make test           Test all crates.
-```
-
-The scripts called by each make command are located in the [script folder.](scripts)
-
 ## Bazelmod support
 
 The Bazel project decided to change the main configuration from the previous WORKSPACE format to the
@@ -54,6 +33,62 @@ current MODULE (a.k.a bazelmod) format. Since Bazel 7, the Bazelmod format has b
 project uses the current bazelmod, but also comes with a working[ WORKSPACE configuration](config/workspace/WORKSPACE).
 This may help people who are
 trying to convert an existing Bazel project from the previous format to the new Bazelmod configuration format.
+
+## Bazel Commands
+
+### Build
+
+* **Build everything:** `bazel build //...`
+* **Build grpc client example:** `bazel build //grpc_client:bin`
+* **Build grpc server example:** `bazel build //grpc_server:bin`
+* **Build cross compile example:** `bazel build //hello_cross:bin`
+* **Build tokio rest example:** `bazel build //rest_tokio:bin`
+
+### Optimize
+
+Applies compiler optimization similar to the Rust release mode to binaries. These optimization must be defined in each
+binary target. Bazel's `-c opt` flag can be added to any build, test, or run target. However, please be consistent because a change of that flag triggers a complete rebuild of the target. 
+
+* **Optimize all binaries:** `bazel build -c opt //...`
+* **Optimize only one example:** `bazel build -c opt //grpc_client:bin`
+
+### Test
+
+* **Test everything:** `bazel test //...`
+* **Test only unit tests:** `bazel test //... --test_tag_filters=unit`
+
+### Doc
+
+* **Generate all documentation:** `bazel build //... --build_tag_filters=doc`
+* **Build all doc tests:** `bazel build //... --build_tag_filters=doc-test`
+* **Run all doc tests:** `bazel test //... --test_tag_filters=doc-test`
+
+### Run
+
+* **Run grpc client example:** `bazel run //grpc_client:bin`
+* **Run grpc server example:** `bazel run //grpc_server:bin`
+* **Run tokio rest example:**  `bazel run //rest_tokio:bin`
+
+Note: gRPC client & server current throw an error due to a Tokio
+version mismatch. [The underlying issue is under investigation](https://github.com/bazelbuild/rules_rust/issues/2689).
+
+### Container
+
+Debug
+* **Build all container images in debug mode:** `bazel build//:image`
+* **Push all debug mode images to container registry:** `command bazel run //:push`
+
+Release (optimized) mode
+* **Build all container images in release mode:** `bazel build -c opt //:image`
+* **Push all release mode images to container registry:** `command bazel run -c opt //:push`
+
+Note: To enable push to a container registry, you have to configure a container registry for each container. As a side-effect, you can push different containers to different registries. To do so, please edit the push target in the following files:
+
+* [gRPC Server/BUILD.bazel](grpc_server/BUILD.bazel)
+* [rest_tokio/BUILD.bazel](rest_tokio/BUILD.bazel)
+
+For details how to configure push, please refer to the [official rules_oci documentation.](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md)
+
 
 ## Bazel configuration
 

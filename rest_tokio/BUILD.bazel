@@ -1,15 +1,16 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test", "rust_test_suite")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
 # OCI Container Rules
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
-# Custom container macro
+# Custom macro
 load("//:build_image.bzl", "build_image", "build_tag")
 
 # Build binary
-# https://bazelbuild.github.io/rules_rust/defs.html#rust_binary
 rust_binary(
     name = "bin",
     crate_root = "src/main.rs",
     srcs = glob([
+        "src/*/*.rs",
         "src/*.rs",
     ]),
     rustc_flags = select({
@@ -26,59 +27,47 @@ rust_binary(
         ],
     }),
     deps = [
+        # Internal crates
+
         # Custom Memory Allocator
         "@crates//:jemallocator",
-        # Internal crates
-        "//proto_bindings:rust_proto",
         # External crates
+        "@crates//:arc-swap",
+        "@crates//:serde",
+        "@crates//:serde_json",
         "@crates//:tokio",
-        "@crates//:tonic",
+        "@crates//:tokio-cron-scheduler",
+        "@crates//:warp",
     ],
+    tags = ["service", "rest-tokio"],
     visibility = ["//visibility:public"],
 )
 
-
 # Build documentation
-# https://bazelbuild.github.io/rules_rust/rust_doc.html
 rust_doc(
-    name = "server_doc",
+    name = "doc",
     crate = ":bin",
+    tags = ["doc"],
     visibility = ["//visibility:public"],
 )
 
 # Test documentation
-# https://bazelbuild.github.io/rules_rust/rust_doc.html#rust_doc_test
 rust_doc_test(
-     name = "server_doc_test",
+     name = "doc_test",
      crate = ":bin",
+     tags = ["doc-test"],
      visibility = ["//visibility:public"],
  )
 
-rust_test_suite(
-    name = "demo_tests",
-    srcs = glob([
-        "tests/*_tests.rs",
-    ]),
-    deps = [
-      # Crate to test
-      "//proto_bindings:rust_proto",
-      # External crates
-    ],
-    tags = ["unit"],
-    visibility = ["//visibility:public"],
-)
-
-# Build container image for server
-# This is a custom macro defined in build_image.bzl in the project root folder
+# Build container image
 build_image(
     name = "image",
     srcs = [":bin"],
-    exposed_ports = ["5042"],
+    exposed_ports = ["7777"],
     visibility = ["//visibility:public"],
 )
 
 # Build an unique and immutable image tag based on the image SHA265 digest.
-# This is a custom macro defined in build_image.bzl in the project root folder
 build_tag(
     name = "remote_tag",
     image = ":image",
@@ -87,11 +76,10 @@ build_tag(
 )
 
 # Publish image to registry
-# https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md
 oci_push(
     name = "push",
     image = ":image",
-    repository = "my.registry.host.com",
+    repository = "my.registry.com/rest-tokio",
     remote_tags = ":remote_tag",
     visibility = ["//visibility:public"],
 )

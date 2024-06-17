@@ -8,7 +8,7 @@ load("//:build_image.bzl", "build_image", "build_tag")
 # Build binary
 # https://bazelbuild.github.io/rules_rust/defs.html#rust_binary
 rust_binary(
-    name = "client",
+    name = "bin",
     crate_root = "src/main.rs",
     srcs = glob([
         "src/*.rs",
@@ -40,7 +40,7 @@ rust_binary(
 # https://bazelbuild.github.io/rules_rust/rust_doc.html
 rust_doc(
     name = "client_doc",
-    crate = ":client",
+    crate = ":bin",
     visibility = ["//visibility:public"],
 )
 
@@ -48,7 +48,7 @@ rust_doc(
 # https://bazelbuild.github.io/rules_rust/rust_doc.html#rust_doc_test
 rust_doc_test(
      name = "client_doc_test",
-     crate = ":client",
+     crate = ":bin",
      visibility = ["//visibility:public"],
  )
 
