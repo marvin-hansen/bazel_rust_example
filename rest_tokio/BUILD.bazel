@@ -27,8 +27,6 @@ rust_binary(
         ],
     }),
     deps = [
-        # Internal crates
-
         # Custom Memory Allocator
         "@crates//:jemallocator",
         # External crates
