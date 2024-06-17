@@ -36,7 +36,11 @@ Please run `make release` to see details which config to update.
 
 ## Container build
 
-Containers are build and published without Docker thanks to [rules_oci](https://github.com/bazel-contrib/rules_oci/tree/main). This is very favorable for CI builds as it accelerates container build times significantly. However, if you want to run these containers locally, you need a Docker installation to pull and run a container image just as you would normally do. Cross compilation binaries don't have container builds, but these can easily be added following the examples given. 
+Containers are build and published without Docker thanks
+to [rules_oci](https://github.com/bazel-contrib/rules_oci/tree/main). This is very favorable for CI builds as it
+accelerates container build times significantly. However, if you want to run these containers locally, you need a Docker
+installation to pull and run a container image just as you would normally do. Cross compilation binaries don't have
+container builds, but these can easily be added following the examples given.
 
 ## Bazelmod support
 
