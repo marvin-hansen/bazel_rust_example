@@ -9,6 +9,7 @@ Examples:
 * [gRRC Server (with container build)](grpc_server)
 * [Proto Prost Bindings](proto_bindings)
 * [Cross compilation](hello_cross)
+* [MUSL cross compilation (with scratch container build)](musl_container)
 * [Tokio REST API (No Cargo, with container build)](rest_tokio)
 
 The project covers quite a bit of groundwork:
@@ -59,6 +60,7 @@ trying to convert an existing Bazel project from the previous format to the new 
 * **Build grpc client example:** `bazel build //grpc_client:bin`
 * **Build grpc server example:** `bazel build //grpc_server:bin`
 * **Build cross compile example:** `bazel build //hello_cross:bin`
+* **Build MUSL scratch example:** `bazel build //musl_container:bin`
 * **Build tokio rest example:** `bazel build //rest_tokio:bin`
 
 ### Optimize
@@ -86,6 +88,10 @@ because a change of that flag triggers a complete rebuild of the target.
 * **Run grpc client example:** `bazel run //grpc_client:bin`
 * **Run grpc server example:** `bazel run //grpc_server:bin`
 * **Run tokio rest example:**  `bazel run //rest_tokio:bin`
+
+Note, you cannot run the cross compiled binaries unless you copy them to a machine with a matching
+architecture i.e. ARM or x86. For the MUSL example, it's best to build the container image, push it to a registry,
+and then just use Docker to pull and run it just as you would normally do with any other container.
 
 ### Container
 
