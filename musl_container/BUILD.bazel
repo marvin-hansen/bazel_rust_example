@@ -3,7 +3,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
 # Custom macro
-load("//:build_image.bzl", "build_image", "build_tag")
+load("//:build_image.bzl","build_tag")
 
 # Build binary
 rust_binary(
@@ -14,6 +14,20 @@ rust_binary(
         "src/*/*.rs",
         "src/*.rs",
     ]),
+
+    rustc_flags = select({
+       "//:release": [
+            "-Clto",
+            "-Ccodegen-units=1",
+            "-Cpanic=abort",
+            "-Copt-level=3",
+            "-Cstrip=symbols",
+            ],
+        "//conditions:default":
+        [
+           "-Copt-level=0",
+        ],
+    }),
 
     deps = [
         # Custom Memory Allocator
@@ -29,15 +43,25 @@ rust_binary(
 
     platform = "//build/platforms:linux_x86_64_musl",
 
-    tags = ["service", "rest-tokio"],
+    tags = ["service", "musl-tokio"],
 
     visibility = ["//visibility:public"],
 )
 
-# Build container image
-build_image(
-    name = "image",
+
+# Compress binary to a layer using pkg_tar
+pkg_tar(
+    name = "tar",
     srcs = [":bin"],
+)
+
+# Build container image
+# https://github.com/bazel-contrib/rules_oci/blob/main/docs/image.md
+oci_image(
+    name = "image",
+    base = "@distroless",
+    tars = [":tar"],
+    entrypoint = ["/bin"],
     exposed_ports = ["3232"],
     visibility = ["//visibility:public"],
 )
