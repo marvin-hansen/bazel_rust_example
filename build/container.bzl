@@ -27,7 +27,7 @@ def build_image(name, srcs, exposed_ports = [], visibility=None):
     )
 
 
-def _build_tag_impl(ctx):
+def _build_sha265_tag_impl(ctx):
 
     # Both the input and output files are specified by the BUILD file.
     in_file = ctx.file.input
@@ -44,9 +44,9 @@ def _build_tag_impl(ctx):
     )
 
 
-build_tag = rule(
+build_sha265_tag = rule(
     doc = "Extracts a 7 characters long short hash from the image digest.",
-    implementation = _build_tag_impl,
+    implementation = _build_sha265_tag_impl,
     attrs = {
         "image": attr.label(
             allow_single_file = True,

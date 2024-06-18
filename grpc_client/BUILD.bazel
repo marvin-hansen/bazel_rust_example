@@ -1,8 +1,4 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test", "rust_test_suite")
-# OCI Container Rules
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
-# Custom container macro
-load("//:build_image.bzl", "build_image", "build_tag")
 
 
 # Build binary

@@ -3,7 +3,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
 # Custom macro
-load("//:build_image.bzl", "build_image", "build_tag")
+load("//:build/container.bzl", "build_image", "build_sha265_tag")
 
 # Build binary
 rust_binary(
@@ -66,7 +66,7 @@ build_image(
 )
 
 # Build an unique and immutable image tag based on the image SHA265 digest.
-build_tag(
+build_sha265_tag(
     name = "remote_tag",
     image = ":image",
     input = "image.json.sha256",

@@ -2,7 +2,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test", "
 # OCI Container Rules
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
 # Custom container macro
-load("//:build_image.bzl", "build_image", "build_tag")
+load("//:build/container.bzl", "build_image", "build_sha265_tag")
 
 # Build binary
 # https://bazelbuild.github.io/rules_rust/defs.html#rust_binary
@@ -79,7 +79,7 @@ build_image(
 
 # Build an unique and immutable image tag based on the image SHA265 digest.
 # This is a custom macro defined in build_image.bzl in the project root folder
-build_tag(
+build_sha265_tag(
     name = "remote_tag",
     image = ":image",
     input = "image.json.sha256",
