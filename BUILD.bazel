@@ -11,16 +11,17 @@ filegroup(
     name = "image",
     srcs = [
         "//grpc_server:image",
+        "//musl_container:image",
         "//rest_tokio:image",
     ],
     visibility = ["//visibility:public"],
 )
 
-
 multirun(
     name = "push",
     commands = [
         "push_grpc_server",
+        "push_musl_container",
         "push_rest_tokio",
     ],
     jobs = 1, # Set to parallel
@@ -30,6 +31,12 @@ multirun(
 command(
     name = "push_grpc_server",
     command =  "//grpc_server:push",
+    arguments = [], # Optional arguments passed directly to the tool
+)
+
+command(
+    name = "push_musl_container",
+    command =  "//musl_container:push",
     arguments = [], # Optional arguments passed directly to the tool
 )
 
