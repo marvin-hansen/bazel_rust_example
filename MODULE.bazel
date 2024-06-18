@@ -59,6 +59,8 @@ rust.toolchain(
     extra_target_triples = [
         "aarch64-unknown-linux-gnu",
         "x86_64-unknown-linux-gnu",
+        "x86_64-unknown-linux-musl",
+        "aarch64-unknown-linux-musl",
     ],
 )
 use_repo(rust, "rust_toolchains")
@@ -74,6 +76,8 @@ register_toolchains("@//build/prost_toolchain")
 #  O C I  I M A G E
 ###############################################################################
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+#
+# https://github.com/GoogleContainerTools/distroless
 oci.pull(
     name = "distroless",
     digest = "sha256:e1065a1d58800a7294f74e67c32ec4146d09d6cbe471c1fa7ed456b2d2bf06e0",
@@ -81,6 +85,15 @@ oci.pull(
     platforms = ["linux/amd64", "linux/arm64/v8"],
 )
 use_repo(oci, "distroless")
+#
+# https://hub.docker.com/r/hansenmarvin/rust-scratch/tags
+oci.pull(
+    name = "scratch",
+    digest = "sha256:e7ad93e7f69c2bab9f53e143d12f436a4216960f8f1cbf02b960bfb2e0c2f24a",
+    image = "hansenmarvin/rust-scratch",
+    platforms = ["linux/amd64", "linux/arm64"],
+)
+use_repo(oci, "scratch")
 
 ###############################################################################
 # R U S T  C R A T E S

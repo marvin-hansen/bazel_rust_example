@@ -14,8 +14,16 @@ mod errors;
 mod handler;
 mod types;
 
-const VRB: bool = false;
-const PORT: u16 = 4242;
+use jemallocator::Jemalloc;
+
+// jemallocator fixes a threat contention issue
+// in the default MUSL memory allocator.
+// https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
+const VRB: bool = true;
+const PORT: u16 = 3232;
 
 #[tokio::main]
 async fn main() {
