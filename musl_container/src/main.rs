@@ -16,8 +16,8 @@ mod types;
 
 use jemallocator::Jemalloc;
 
-// jemallocator fixes a threat contention issue
-// in the default MUSL memory allocator.
+// Jemalloc overwrites the default memory allocator.
+// This fixes a performance issue due to threat contention in the MUSL memory allocator.
 // https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
