@@ -12,7 +12,7 @@ them.
 2. [Rust SDK](#rust-sdk)
 3. [Dependencies](#Dependencies)
 4. [Rust Proto / gRPC](#rust-proto)
-5. [Cross compilation](#cross-compilation)
+5. [Compiler Optimization](#compiler-optimization)
 
 ## Setup
 
@@ -389,4 +389,56 @@ rust_prost_library(
 From there, you
 just [follow the target documentation](https://bazelbuild.github.io/rules_rust/rust_proto.html#rust_proto_library).
 
-## Cross compilation
+## Compiler Optimization
+
+By default, rules_rust do not provide a mechanism to apply various Rust compiler optimization flags you would usually
+define in a Cargo.toml file. However, you can define compiler option pass through for each binary target. This takes
+just three steps:
+
+1) In your root folder BUILD.bazel, add the following entry:
+
+```Starlark
+config_setting(
+    name = "release",
+    values = {
+        "compilation_mode": "opt",
+    },
+)
+```
+
+This maps Rusts release mode to Bazel's -c opt.
+
+2) In your binary, add the opt flags & strip settings:
+
+```Starlark 
+# Build binary
+rust_binary(
+    name = "bin",
+    crate_root = "src/main.rs",
+    srcs = glob([
+        "src/*/*.rs",
+        "src/*.rs",
+    ]),
+    # Compiler optimization
+    rustc_flags = select({
+       "//:release": [
+            "-Clto",
+            "-Ccodegen-units=1",
+            "-Cpanic=abort",
+            "-Copt-level=3",
+            "-Cstrip=symbols",
+            ],
+        "//conditions:default":
+        [
+           "-Copt-level=0",
+        ],
+    }),
+
+    deps = [   ],
+    visibility = ["//visibility:public"],
+)
+```
+
+3) Run bazel build with optimization
+
+`bazel build -c opt //...`
