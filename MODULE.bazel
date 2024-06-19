@@ -20,7 +20,7 @@ bazel_dep(name = "rules_pkg", version = "0.10.1")
 #
 # Rules for proto
 # https://github.com/bazelbuild/rules_proto/releases
-bazel_dep(name = "rules_proto", version = "6.0.0")
+bazel_dep(name = "rules_proto", version = "6.0.2")
 # https://github.com/aspect-build/toolchains_protoc/releases
 bazel_dep(name = "toolchains_protoc", version = "0.3.1")
 # https://registry.bazel.build/modules/protobuf
@@ -50,7 +50,7 @@ register_toolchains("@llvm_toolchain//:all")
 
 # Rust toolchain
 RUST_EDITION = "2021"
-RUST_VERSION = "1.78.0"
+RUST_VERSION = "1.79.0"
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
