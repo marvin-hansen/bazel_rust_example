@@ -12,6 +12,7 @@ them.
 2. [Rust SDK](#rust-sdk)
 3. [Dependencies](#Dependencies)
 4. [Rust Proto / gRPC](#rust-proto)
+5. [Cross compilation](#cross-compilation)
 
 ## Setup
 
@@ -386,4 +387,6 @@ rust_prost_library(
 ```
 
 From there, you
-just [follow the target documentation](https://bazelbuild.github.io/rules_rust/rust_proto.html#rust_proto_library). 
+just [follow the target documentation](https://bazelbuild.github.io/rules_rust/rust_proto.html#rust_proto_library).
+
+## Cross compilation
