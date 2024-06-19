@@ -894,7 +894,7 @@
     "@@rules_oci~//oci:extensions.bzl%oci": {
       "general": {
         "bzlTransitiveDigest": "sonndpk/I7Km3q/WaCiYa93OJ6ya4oSiuRL6AHkFgTY=",
-        "usagesDigest": "CTgI79CasFwvyDwtdHZhC/h6NQYC9sRiEUk9qRpzeEQ=",
+        "usagesDigest": "4GMrtwpS8/GO1uLp45nwS0/39S2VU6nS61lsz7y9r0U=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1009,9 +1009,9 @@
             "ruleClassName": "oci_pull",
             "attributes": {
               "scheme": "https",
-              "registry": "hansenmarvin",
-              "repository": "rust-scratch",
-              "identifier": "sha256:e7ad93e7f69c2bab9f53e143d12f436a4216960f8f1cbf02b960bfb2e0c2f24a",
+              "registry": "index.docker.io",
+              "repository": "hansenmarvin/rust-scratch",
+              "identifier": "sha256:c6d1c2b62a454d6c5606645b5adfa026516e3aa9213a6f7648b8e9b3cc520f76",
               "platform": "linux/amd64",
               "target_name": "scratch_linux_amd64"
             }
@@ -1137,9 +1137,9 @@
             "attributes": {
               "target_name": "scratch",
               "scheme": "https",
-              "registry": "hansenmarvin",
-              "repository": "rust-scratch",
-              "identifier": "sha256:e7ad93e7f69c2bab9f53e143d12f436a4216960f8f1cbf02b960bfb2e0c2f24a",
+              "registry": "index.docker.io",
+              "repository": "hansenmarvin/rust-scratch",
+              "identifier": "sha256:c6d1c2b62a454d6c5606645b5adfa026516e3aa9213a6f7648b8e9b3cc520f76",
               "platforms": {
                 "@@platforms//cpu:x86_64": "@scratch_linux_amd64",
                 "@@platforms//cpu:arm64": "@scratch_linux_arm64"
@@ -1262,9 +1262,9 @@
             "ruleClassName": "oci_pull",
             "attributes": {
               "scheme": "https",
-              "registry": "hansenmarvin",
-              "repository": "rust-scratch",
-              "identifier": "sha256:e7ad93e7f69c2bab9f53e143d12f436a4216960f8f1cbf02b960bfb2e0c2f24a",
+              "registry": "index.docker.io",
+              "repository": "hansenmarvin/rust-scratch",
+              "identifier": "sha256:c6d1c2b62a454d6c5606645b5adfa026516e3aa9213a6f7648b8e9b3cc520f76",
               "platform": "linux/arm64",
               "target_name": "scratch_linux_arm64"
             }

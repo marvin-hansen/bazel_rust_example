@@ -58,6 +58,7 @@ rust_doc_test(
 # Build container image
 build_image(
     name = "image",
+    base = "@distroless",
     srcs = [":bin"],
     exposed_ports = ["4242"],
     visibility = ["//visibility:public"],

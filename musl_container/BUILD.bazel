@@ -9,12 +9,11 @@ load("//:build/container.bzl", "build_sha265_tag")
 rust_binary(
     name = "bin",
     crate_root = "src/main.rs",
-
     srcs = glob([
         "src/*/*.rs",
         "src/*.rs",
     ]),
-
+    # Compiler optimization
     rustc_flags = select({
        "//:release": [
             "-Clto",
@@ -30,7 +29,8 @@ rust_binary(
     }),
 
     deps = [
-        # Custom Memory Allocator
+        # Jemallocator Memory Allocator fixes a concurrency performance issue in MUSL
+        # https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes
         "@crates//:jemallocator",
         # External crates
         "@crates//:arc-swap",
@@ -42,9 +42,7 @@ rust_binary(
     ],
 
     platform = "//build/platforms:linux_x86_64_musl",
-
     tags = ["service", "musl-tokio"],
-
     visibility = ["//visibility:public"],
 )
 
@@ -59,7 +57,7 @@ pkg_tar(
 # https://github.com/bazel-contrib/rules_oci/blob/main/docs/image.md
 oci_image(
     name = "image",
-    base = "@distroless",
+    base = "@scratch",
     tars = [":tar"],
     entrypoint = ["/bin"],
     exposed_ports = ["3232"],

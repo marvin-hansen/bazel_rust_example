@@ -72,6 +72,7 @@ rust_test_suite(
 # This is a custom macro defined in build_image.bzl in the project root folder
 build_image(
     name = "image",
+    base = "@distroless",
     srcs = [":bin"],
     exposed_ports = ["5042"],
     visibility = ["//visibility:public"],
