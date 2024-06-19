@@ -2,8 +2,10 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
 # OCI Container Rules
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
-# Custom macro
-load("//:build/container.bzl", "build_sha265_tag")
+# Custom container macro
+load("//:build/container.bzl", "build_image", "build_sha265_tag")
+# Custom platform transition macro
+load("//:build/transition.bzl", "multi_arch")
 
 # Build binary
 rust_binary(
@@ -40,27 +42,36 @@ rust_binary(
         "@crates//:tokio-cron-scheduler",
         "@crates//:warp",
     ],
-
-    platform = "//build/platforms:linux_x86_64_musl",
     tags = ["service", "musl-tokio"],
     visibility = ["//visibility:public"],
 )
 
-
-# Compress binary to a layer using pkg_tar
-pkg_tar(
-    name = "tar",
-    srcs = [":bin"],
-)
-
 # Build container image
-# https://github.com/bazel-contrib/rules_oci/blob/main/docs/image.md
-oci_image(
+# This is a custom macro defined in build_image.bzl in the project root folder
+build_image(
     name = "image",
     base = "@scratch",
-    tars = [":tar"],
-    entrypoint = ["/bin"],
-    exposed_ports = ["3232"],
+    srcs = [":bin"],
+    exposed_ports = ["5042"],
+    visibility = ["//visibility:public"],
+)
+
+# Build multi-arch images
+multi_arch(
+    name = "multi_arch_images",
+    image = ":image",
+    platforms = [
+        "//build/platforms:linux_x86_64_musl",
+        "//build/platforms:linux_arm64_musl",
+    ],
+)
+
+# Build a container image index.
+oci_image_index(
+    name = "image_index",
+    images = [
+        ":multi_arch_images",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -72,10 +83,10 @@ build_sha265_tag(
     output = "_tag.txt",
 )
 
-# Publish image to registry
+# Publish multi-arch with image index to registry
 oci_push(
     name = "push",
-    image = ":image",
+    image = ":image_index",
     repository = "my.registry.com/musl",
     remote_tags = ":tags",
     visibility = ["//visibility:public"],
