@@ -69,7 +69,7 @@ register_toolchains("@rust_toolchains//:all")
 # Proto toolchain
 register_toolchains("@rules_rust//proto/protobuf:default-proto-toolchain")
 
-# Prost toolchain
+# Custom Prost toolchain
 register_toolchains("@//build/prost_toolchain")
 
 ###############################################################################

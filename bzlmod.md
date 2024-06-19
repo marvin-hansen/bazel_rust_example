@@ -8,27 +8,10 @@ them.
 
 # Table of Contents
 
-1. [Supported bazel versions](#supported-bazel-versions)
-2. [Supported platforms](#supported-platforms)
-3. [Setup](#Setup)
-4. [Rust SDK](#rust-sdk)
-5. [Dependencies](#Dependencies)
-
-## Supported bazel versions
-
-The oldest version of Bazel the `main` branch is tested against is `6.3.0`. Previous versions may still be functional in
-certain environments, but this is the minimum version we strive to fully support. We test these rules against the latest
-rolling releases of Bazel, and aim for compatibility with them, but prioritise stable releases over rolling releases
-where necessary.
-
-## Supported platforms
-
-We aim to support Linux and macOS.
-
-We do not have sufficient maintainer expertise to support Windows. Most things probably work, but we have had to disable
-many tests in CI because we lack the expertise to fix them. We welcome contributions to help improve its support.
-Windows support for some features requires `--enable_runfiles` to be passed to Bazel, we recommend putting it in your
-bazelrc. See [Using Bazel on Windows](https://bazel.build/configure/windows) for more Windows-specific recommendations.
+1. [Setup](#Setup)
+2. [Rust SDK](#rust-sdk)
+3. [Dependencies](#Dependencies)
+4. [Rust Proto / gRPC](#rust-proto)
 
 ## Setup
 
@@ -247,22 +230,160 @@ CARGO_BAZEL_REPIN=1 bazel sync --only=crates
 ```
 
 This will result in all dependencies being updated for a project. The `CARGO_BAZEL_REPIN` environment variable
-can also be used to customize how dependencies are updated. The following table shows translations from environment
-variable values to the equivilant [cargo update](https://doc.rust-lang.org/cargo/commands/cargo-update.html) command
-that is called behind the scenes to update dependencies.
+can also be used to customize how dependencies are updated. For more details about
+repin, [please refer to the documentation](https://bazelbuild.github.io/rules_rust/crate_universe.html#crates_vendor).
 
-| Value                                          | Cargo command                                                |
-|------------------------------------------------|--------------------------------------------------------------|
-| Any of [`true`, `1`, `yes`, `on`, `workspace`] | `cargo update --workspace`                                   |
-| Any of [`full`, `eager`, `all`]                | `cargo update`                                               |
-| `package_name`                                 | `cargo upgrade --package package_name`                       |
-| `package_name@1.2.3`                           | `cargo upgrade --package package_name@1.2.3`                 |
-| `package_name@1.2.3=4.5.6`                     | `cargo upgrade --package package_name@1.2.3 --precise=4.5.6` |
+## Rust Proto
 
-If the `crates_repository` is used multiple times in the same Bazel workspace (e.g. for multiple independent
-Rust workspaces), it may additionally be useful to use the `CARGO_BAZEL_REPIN_ONLY` environment variable, which
-limits execution of the repinning to one or multiple instances of the `crates_repository` rule via a comma-delimited
-allowlist:
+These build rules are used for building protobufs/gRPC in Rust with Bazel.
 
-```shell
-CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=crates bazel sync --only=crates
+The prost and tonic rules do not specify a default toolchain in order to avoid mismatched dependency issues. While the
+tonic toolchain works out of the box
+when its dependencies are matched, however, Prost requires a custom toolchain you have to define before you can build
+proto files with rules_rust.
+
+### Setup
+
+The setup requires three steps to complete before you can configure proto targets.
+
+1. Configure rules and dependencies in MODULE.bazel
+2. Configure a custom Prost toolchain
+3. Register custom Prost toolchain.
+
+**1) Configure rules and dependencies**
+
+In your MODULE.bazel, you add three new entries:
+
+```starlark
+# 1 Register rules for proto
+###############################################################################
+
+# https://github.com/bazelbuild/rules_proto/releases
+bazel_dep(name = "rules_proto", version = "6.0.2")
+# https://github.com/aspect-build/toolchains_protoc/releases
+bazel_dep(name = "toolchains_protoc", version = "0.3.1")
+# https://registry.bazel.build/modules/protobuf
+bazel_dep(name = "protobuf", version = "27.1")
+
+# 2 Register Proto toolchain 
+###############################################################################
+# Proto toolchain
+register_toolchains("@rules_rust//proto/protobuf:default-proto-toolchain")
+
+# 3 Register proto / prost / tonic crates 
+###############################################################################
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+
+# protobufs / gRPC
+crate.spec(package = "prost", version = "0.12")
+crate.spec(package = "prost-types", default_features = False, version = "0.12")
+crate.spec(package = "tonic", features = ["transport"], version = "0.11")
+crate.spec(package = "tonic-build", version = "0.11")
+crate.spec(package = "protoc-gen-prost", version = "0.3.1")
+crate.spec(package = "protoc-gen-tonic", version = "0.4.0")
+
+crate.annotation(
+    crate = "protoc-gen-prost",
+    gen_binaries = ["protoc-gen-prost"],
+)
+
+crate.annotation(   
+    crate = "protoc-gen-tonic",   
+    gen_binaries = ["protoc-gen-tonic"],
+)
+
+# Other Rust dependencies ... 
+
+crate.from_specs()
+use_repo(crate, "crates")
+```
+
+**2) Configure a custom Prost toolchain**
+
+Configuring a custom Prost toolchain is straightforward, you create a new folder with an empty BUILD.bazl file, and add
+the toolchain definition.
+As your Bazel setup grows over time, it is a best practice to put all custom macros, rules, and toolchains in a
+dedicated folder, for example: `build/`.
+
+Suppose you have your BUILD.bazl file in `build/prost_toolchain/BUILD.bazel`, then add the following content:
+
+```starlark
+load("@rules_rust//proto/prost:defs.bzl", "rust_prost_toolchain")
+load("@rules_rust//rust:defs.bzl", "rust_library_group")
+
+rust_library_group(
+    name = "prost_runtime",
+    deps = [
+        "@crates//:prost",
+    ],
+)
+
+rust_library_group(
+    name = "tonic_runtime",
+    deps = [
+        ":prost_runtime",
+        "@crates//:tonic",
+    ],
+)
+
+rust_prost_toolchain(
+    name = "prost_toolchain_impl",
+    prost_plugin = "@crates//:protoc-gen-prost__protoc-gen-prost",
+    prost_runtime = ":prost_runtime",
+    prost_types = "@crates//:prost-types",
+    proto_compiler = "@protobuf//:protoc",
+    tonic_plugin = "@crates//:protoc-gen-tonic__protoc-gen-tonic",
+    tonic_runtime = ":tonic_runtime",
+)
+
+toolchain(
+    name = "prost_toolchain",
+    toolchain = "prost_toolchain_impl",
+    toolchain_type = "@rules_rust//proto/prost:toolchain_type",
+)
+```
+
+The Prost and Tonic dependencies are pulled from the previously configured
+crate dependencies in the MODULE file. With this custom toolchain in place, the last step is to register it.
+
+**3. Register custom Prost toolchain.**
+
+In your MODULE.bazel file, locate your toolchains and add the following entry right below the proto toolchain.
+
+```starlark
+# Custom Prost toolchain
+register_toolchains("@//build/prost_toolchain")
+```
+
+Pay attention to the path, `build/prost_toolchain` because if your toolchain
+is in a different folder, you have to update this path to make the build work.
+
+### Usage
+
+Once the setup has been completed, you use the proto & prost targets as you normally do. For example, to configure rust
+bindings for a proto file, just add the target:
+
+```starlark
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_rust//proto/prost:defs.bzl", "rust_prost_library")
+
+# Build proto files
+# https://bazelbuild.github.io/rules_rust/rust_proto.html#rust_proto_library
+proto_library(
+    name = "proto_bindings",
+    srcs = [
+          "proto/helloworld.proto",
+    ],
+)
+
+# Generate Rust bindings from the generated proto files
+# https://bazelbuild.github.io/rules_rust/rust_proto.html#rust_prost_library
+rust_prost_library(
+    name = "rust_proto",
+    proto = ":proto_bindings",
+    visibility = ["//visibility:public"],
+)
+```
+
+From there, you
+just [follow the target documentation](https://bazelbuild.github.io/rules_rust/rust_proto.html#rust_proto_library). 
