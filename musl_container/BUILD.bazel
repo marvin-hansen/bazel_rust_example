@@ -3,7 +3,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
 # Custom container macro
-load("//:build/container.bzl", "build_image", "build_sha265_tag")
+load("//:build/container.bzl", "build_sha265_tag")
 # Custom platform transition macro
 load("//:build/transition.bzl", "multi_arch")
 
@@ -46,13 +46,20 @@ rust_binary(
     visibility = ["//visibility:public"],
 )
 
+# Compress binary to a layer using pkg_tar
+pkg_tar(
+    name = "tar",
+    srcs = [":bin"],
+)
+
 # Build container image
-# This is a custom macro defined in build_image.bzl in the project root folder
-build_image(
+# https://github.com/bazel-contrib/rules_oci/blob/main/docs/image.md
+oci_image(
     name = "image",
     base = "@scratch",
-    srcs = [":bin"],
-    exposed_ports = ["5042"],
+    tars = [":tar"],
+    entrypoint = ["/bin"],
+    exposed_ports = ["3232"],
     visibility = ["//visibility:public"],
 )
 
@@ -78,7 +85,7 @@ oci_image_index(
 # Build an unique and immutable image tag based on the image SHA265 digest.
 build_sha265_tag(
     name = "tags",
-    image = ":image",
+    image = ":image_index",
     input = "image.json.sha256",
     output = "_tag.txt",
 )

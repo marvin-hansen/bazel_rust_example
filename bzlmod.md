@@ -16,6 +16,7 @@ them.
 4. [Rust Proto / gRPC](#rust-proto)
 5. [Compiler Optimization](#compiler-optimization)
 6. [Cross Compilation](#cross-compilation)
+7. [MUSL Scratch Container](#musl-scratch-container)
 
 ## Setup
 
@@ -621,5 +622,425 @@ static binary packaged in a scratch container.
 
 ### Setup
 
+The initial setup is similar to the previous cross compilation example. However, in addition to LLVM and platform
+support, we also add the MUSL toolchain, and a bunch of other rules used throughout this example,
+
+```Starlark
+# https://github.com/bazelbuild/bazel-skylib/releases/
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+# https://github.com/aspect-build/bazel-lib/releases
+bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
+# https://github.com/bazel-contrib/rules_oci/releases
+bazel_dep(name = "rules_oci", version = "1.7.6")
+# https://github.com/bazelbuild/rules_pkg/releases
+bazel_dep(name = "rules_pkg", version = "0.10.1")
+
+# MUSL toolchain
+# https://github.com/bazel-contrib/musl-toolchain/releases
+bazel_dep(name = "toolchains_musl", version = "0.1.16", dev_dependency = True)
+# Rules for cross compilation
+# https://github.com/bazelbuild/platforms/releases
+bazel_dep(name = "platforms", version = "0.0.10")
+# https://github.com/bazel-contrib/toolchains_llvm
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
+```
+
+Then, you have to configure LLVM and add the MUSL triplets to the RUST toolchain.
+
+```Starlark
+# LLVM Toolchain
+# rules_rust still needs a cpp toolchain, so provide a cross-compiling one here
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    name = "llvm_toolchain",
+    llvm_version = "16.0.0",
+)
+use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
+register_toolchains("@llvm_toolchain//:all")
+
+# Rust toolchain
+RUST_EDITION = "2021"
+RUST_VERSION = "1.79.0"
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = RUST_EDITION,
+    versions = [RUST_VERSION],
+    extra_target_triples = [
+        "x86_64-unknown-linux-musl",
+        "aarch64-unknown-linux-musl",
+    ],
+)
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
+```
+
+Before the MUSL platform can be configured, we need to add a custom linker configuration to redirect the linker to the
+MUSL linker. To do so, add an empty BUILD file in the following path:
+
+`build/linker/BUILD.bazel`
+
+Then add the following content to configure the linker for MUSL.
+
+```Starlark
+package(default_visibility = ["//visibility:public"])
+
+constraint_setting(
+    name = "linker",
+    default_constraint_value = ":unknown",
+)
+
+constraint_value(
+    name = "musl",
+    constraint_setting = ":linker",
+)
+
+# Default linker for anyone not setting the linker to `musl`.
+# You shouldn't ever need to set this value manually.
+constraint_value(
+    name = "unknown",
+    constraint_setting = ":linker",
+)
+```
+
+Then, you edit your platform configuration, assumed to be in the following path:
+
+`build/platforms/BUILD.bazel`
+
+Add the following entries to configure MUSL:
+
+```Starlark
+package(default_visibility = ["//visibility:public"])
+
+platform(
+    name = "linux_x86_64_musl",
+    constraint_values = [
+        "@//build/linker:musl",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)
+
+platform(
+    name = "linux_arm64_musl",
+    constraint_values = [
+        "@//build/linker:musl",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+)
+```
+
+Notice that the path of the linker is set to `//build/linker` so if you chose a different folder,
+you have to update that path accordingly. At this point, you might be tempted to just add the platform to a binary
+target similar to the the cross compilation example. This might work when the binary is the final delivery. However,
+when a scratch container is the deliverable, a few more steps are required.
+
+### Custom Memory allocator.
+
+There is a long-standing multi threading performance issue in MUSL's default memory allocator
+that causes a
+significant [performance drop of at least 10x or more compared to the default memory allocator in Linux.](https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes)
+The real source of the performance degradation is thread contention is in the malloc implementation of musl. One known
+workaround is
+to [patch the memory allocator in place](https://www.tweag.io/blog/2023-08-10-rust-static-link-with-mimalloc/) using a
+rather obscure assembly tool. A unique alternative Rust offers is the global_allocator trait that, once overwritten with
+a custom allocator, simply replaces the memory allocator Rust uses. There are about 4 different memory allocators
+implementation of the global_allocator trait on GitHub. (Add link). For this example, I chose Jemalloc from the
+Free/NetBSD distro because it is among the most robust and battle tested memory allocators out there that still delivers
+excellent performance under heavy multi-threading workload. Also, because Rust produces quite inflated debug symbols, it
+is sensible to add [compiler optimization ](#compiler-optimization) to build a small and fast binary. To so so, add the
+following to your binary target.
+
+```Starlark
+# Build binary
+rust_binary(
+    name = "bin",
+    crate_root = "src/main.rs",
+    srcs = glob([
+        "src/*/*.rs",
+        "src/*.rs",
+    ]),
+    # Compiler optimization
+    rustc_flags = select({
+       "//:release": [
+            "-Clto",
+            "-Ccodegen-units=1",
+            "-Cpanic=abort",
+            "-Copt-level=3",
+            "-Cstrip=symbols",
+            ],
+        "//conditions:default":
+        [
+           "-Copt-level=0",
+        ],
+    }),
+
+    deps = [
+        # Jemallocator Memory Allocator fixes a concurrency performance issue in MUSL
+        # https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes
+        "@crates//:jemallocator",
+        # External dependencies
+        "@crates//:serde",
+        "@crates//:serde_json",
+        "@crates//:tokio",
+        # ...
+    ],
+    tags = ["service", "musl-tokio"],
+    visibility = ["//visibility:public"],
+)
+```
+
+Make sure jemallocator is declared a dependency in your MODULE.bazelmod file:
+
+```Starlark
+###############################################################################
+# R U S T  C R A T E S
+###############################################################################
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+#
+# Custom Memory Allocator
+crate.spec(package = "jemallocator", version = "0.5.4")
+# ... other crate dependencies.
+```
+
+Also, for the compiler optimization to take effect, make sure you have the release mode mapping in your root BUILD file:
+
+```Starlark
+config_setting(
+    name = "release",
+    values = {
+        "compilation_mode": "opt",
+    },
+)
+```
+
+Next, you add a new memory allocator by adding the following lines to your main.rs file:
+
+```Rust
+use jemallocator::Jemalloc;
+
+// Jemalloc overwrites the default memory allocator. This fixes a performance issue in the MUSL.
+// https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
+#[tokio::main]
+async fn main() {
+  // ...
+}
+```
+
+At this point, you want to run a full build and check for any errors.
+
+`bazel build //...`
+
+Also run a full release build to double check that the optimization settings work:
+
+`bazel build -c opt //...`
+
+### Scratch image
+
+The new rules_oci build container images in Bazel without Docker. The process to build a multi_arch scratch image to
+hold your statically linked binary takes a few steps:
+
+1) Compress the Rust binary as tar
+2) Build container image from the tar
+3) Build a multi_arch image for the designated platform(s)
+4) Generate a oci_image_index
+5) Tag the final multi_arch image
+
+Building a multi_arch image, however, requires a platform transition. Without much ado,
+just create new empty BUILD file in a folder containing all your custom BAZEL rules and toolchains, say:
+
+`build/transition.bzl`
+
+And then add the following content:
+
+```Starlark
+"a rule transitioning an oci_image to multiple platforms"
+
+def _multiarch_transition(settings, attr):
+    return [
+        {"//command_line_option:platforms": str(platform)}
+        for platform in attr.platforms
+    ]
+
+multiarch_transition = transition(
+    implementation = _multiarch_transition,
+    inputs = [],
+    outputs = ["//command_line_option:platforms"],
+)
+
+def _impl(ctx):
+    return DefaultInfo(files = depset(ctx.files.image))
+
+multi_arch = rule(
+    implementation = _impl,
+    attrs = {
+        "image": attr.label(cfg = multiarch_transition),
+        "platforms": attr.label_list(),
+        "_allowlist_function_transition": attr.label(
+            default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
+        ),
+    },
+)
+```
+
+Next, you need a custom rule to tag your container. In a hermetic build, you can't rely on timestamps because these
+changes regardless of whether the build has changed. Strictly speaking, timestamps as tags could be made possible in
+Bazel, but it is commonly discouraged. Also, immutable container tags are increasingly encouraged to prevent accidental
+pulling of a different image that has the same tag as the previous one but contains breaking changes relative to the
+previous image. Instead, you want unique tags that only change when the underlying artifact has changed. Turned out,
+rules_oci already generates a sha256 for each OCI image so a simple tag rule would be to extract this has and trim to,
+say 7 characters and use this short hash as unique and immutable tag.
+
+To crate this rule, crate new file, say,
+
+`build/container.bzl`
+
+Then add the following rule:
+
+```Starlark
+def _build_sha265_tag_impl(ctx):
+
+    # Both the input and output files are specified by the BUILD file.
+    in_file = ctx.file.input
+    out_file = ctx.outputs.output
+
+    # No need to return anything telling Bazel to build `out_file` when
+    # building this target -- It's implied because the output is declared
+    # as an attribute rather than with `declare_file()`.
+    ctx.actions.run_shell(
+        inputs = [in_file],
+        outputs = [out_file],
+        arguments = [in_file.path, out_file.path],
+        command = "sed -n 's/.*sha256:\\([[:alnum:]]\\{7\\}\\).*/\\1/p' < \"$1\" > \"$2\"",
+    )
+
+build_sha265_tag = rule(
+    doc = "Extracts a 7 characters long short hash from the image digest.",
+    implementation = _build_sha265_tag_impl,
+    attrs = {
+        "image": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+        ),
+        "input": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            doc = "The image digest file. Usually called image.json.sha256",
+        ),
+        "output": attr.output(
+            doc = "The generated tag file. Usually named _tag.txt"
+        ),
+    },
+)
+
+```
+
+Then, you import this rule together with the multi_arch and some others rules to build a container for your binary
+target.
+
+```Starlark
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
+# OCI Container Rules
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push",  "oci_image_index")
+# Custom container macro
+load("//:build/container.bzl", "build_sha265_tag")
+# Custom platform transition macro
+load("//:build/transition.bzl", "multi_arch")
+```
+
+Remember, the steps to build a multi_arch image are the following:
+
+1) Compress the Rust binary as tar
+2) Build container image from the tar
+3) Build a multi_arch image for the designated platform(s)
+4) Generate a oci_image_index
+5) Tag the final multi_arch image
+
+Let's start with the first three steps. Add the following to your binary target:
+
+```Starlark
+# Compress binary to a layer using pkg_tar
+pkg_tar(
+    name = "tar",
+    srcs = [":bin"],
+)
+
+# Build container image
+# https://github.com/bazel-contrib/rules_oci/blob/main/docs/image.md
+oci_image(
+    name = "image",
+    base = "@scratch",
+    tars = [":tar"],
+    entrypoint = ["/bin"],
+    exposed_ports = ["3232"],
+    visibility = ["//visibility:public"],
+)
+
+# Build multi-arch images
+multi_arch(
+    name = "multi_arch_images",
+    image = ":image",
+    platforms = [
+        "//build/platforms:linux_x86_64_musl",
+        "//build/platforms:linux_arm64_musl",
+    ],
+)
+```
+
+A few notes:
+
+1) Make sure the tar package references the binary.
+2) Make sure the container image exposes the exact same ports as the binary uses.
+3) The base image, scratch, will be added in the next step.
+4) Make sure the path and labels used of the platforms in the multi_arch match exactly the folder structure you have
+   defined in the previous steps.
+
+Next, lets add the remaining two steps plus a declaration to push the final image to a container registry.
+
+```Starlark
+# Build a container image index.
+oci_image_index(
+    name = "image_index",
+    images = [
+        ":multi_arch_images",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# Build an unique and immutable image tag based on the image SHA265 digest.
+build_sha265_tag(
+    name = "tags",
+    image = ":image_index",
+    input = "image.json.sha256",
+    output = "_tag.txt",
+)
+
+# Publish multi-arch with image index to registry
+oci_push(
+    name = "push",
+    image = ":image_index",
+    repository = "my.registry.com/musl",
+    remote_tags = ":tags",
+    visibility = ["//visibility:public"],
+)
+```
+
+Important details:
+
+1) The oci_image_index always references the multi_arch rule even if you only compile for one platform.
+2) The oci_image_index is public because that target is what you call when you build the container without publishing
+   it.
+3) The build_sha265_tag rule uses the image.json.sha256 file from the original image. This is on purpose because the
+   sha265 is only generated for images during the build, but not for the index file.
+4) The oci_push references the image_index to ensure a multi arch image will be published.
+5) oci_push is public because that is the target you call to publish you container.
+
+For details of how to configure a container registry,
+please [consult the official documentation.](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md) 
 
 
