@@ -72,7 +72,7 @@ register_toolchains("@rules_rust//proto/protobuf:default-proto-toolchain")
 register_toolchains("@//build/prost_toolchain")
 
 ###############################################################################
-#  O C I  I M A G E
+#  O C I  B A S E  I M A G E
 ###############################################################################
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 #

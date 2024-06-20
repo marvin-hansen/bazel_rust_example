@@ -841,8 +841,36 @@ Also run a full release build to double check that the optimization settings wor
 
 ### Scratch image
 
-The new rules_oci build container images in Bazel without Docker. The process to build a multi_arch scratch image to
-hold your statically linked binary takes a few steps:
+The new rules_oci build container images in Bazel without Docker. Before you build a container, you have to add base
+image. Previous examples have used the lightweight Distroless containers, but since the binary has been compiled
+statically, all you need is a scratch image. To declare a scratch image, add the following to your MODULE.bazel file:
+
+```Starlark
+###############################################################################
+#  O C I  B A S E  I M A G E
+###############################################################################
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+#
+# https://hub.docker.com/r/hansenmarvin/rust-scratch/tags
+oci.pull(
+    name = "scratch",
+    digest = "sha256:c6d1c2b62a454d6c5606645b5adfa026516e3aa9213a6f7648b8e9b3cc520f76",
+    image = "index.docker.io/hansenmarvin/rust-scratch",
+    platforms = ["linux/amd64", "linux/arm64"],
+)
+use_repo(oci, "scratch")
+```
+
+In this example, a custom scratch image is used. You can inspect the Docker build file on
+[its public repository](https://github.com/marvin-hansen/rust-scratch). As you can the in
+the [Dockerfile](https://github.com/marvin-hansen/rust-scratch/blob/main/Dockerfile), SSL certificates are copied from
+the base image to ensure encrypted connections work as expected. However, this is also a prime example of how an
+attacker could sneak in bogus certificates via sloppy supply chain security.
+
+Therefore, it is generally recommended to build and use your own scratch image instead of relying on unknown third
+parties.
+
+The process to build a multi_arch scratch image to hold your statically linked binary takes a few steps:
 
 1) Compress the Rust binary as tar
 2) Build container image from the tar
@@ -996,7 +1024,7 @@ A few notes:
 
 1) Make sure the tar package references the binary.
 2) Make sure the container image exposes the exact same ports as the binary uses.
-3) The base image, scratch, will be added in the next step.
+3) The base image, scratch, of the container.
 4) Make sure the path and labels used of the platforms in the multi_arch match exactly the folder structure you have
    defined in the previous steps.
 
@@ -1041,6 +1069,129 @@ Important details:
 5) oci_push is public because that is the target you call to publish you container.
 
 For details of how to configure a container registry,
-please [consult the official documentation.](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md) 
+please [consult the official documentation.](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md)
 
+### Custom Container Macro
 
+The scratch image configuration feels quite verbose considering all it does is lumping together a bunch
+of tar files in a multi arch bundle. This becomes quickly tedious if you build a lot of containers
+that roughly follow the same blueprint and only differ on a handful of parameters such as exposed ports, the specific
+platform(s) and similar. In that case, it is advisable to write a custom macro that reduces the boilerplate code to a
+bare minimum.
+
+In short, open or add a file in
+
+`build/container.bzl`
+
+And add the following content:
+
+```Starlark
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index")
+load("//:build/transition.bzl", "multi_arch")
+
+# Build a Bazel Macro
+# https://belov.nz/posts/bazel-rules-macros/
+
+def build_multi_arch_image(
+    name,
+    base,
+    srcs,
+    exposed_ports = [],
+    platforms = [],
+    visibility=None
+    ):
+
+    # https://codilime.com/blog/bazel-build-system-build-containerized-applications/
+    entry_point = "bin"
+    layer_name = "tar_layer"
+
+    # Compress binary to a layer using pkg_tar
+    pkg_tar(
+        name = layer_name,
+        srcs = srcs,
+    )
+
+    # Build container image
+    oci_image(
+        name = "image",
+        base = base,
+        tars = [layer_name],
+        entrypoint = ["/{}".format(entry_point)],
+        exposed_ports = exposed_ports,
+    )
+
+    # Build multi-arch images for the provided platforms
+    multi_arch(
+        name = "multi_arch_images",
+        image = ":image",
+        platforms = platforms,
+    )
+    
+    # Build a container image index.
+    oci_image_index(
+        name = name,
+        images = [
+            ":multi_arch_images",
+        ],
+        visibility = visibility,
+    )
+```
+
+This macro rule turns the previous boilerplate into a template you can import and use
+to build your custom MUSL scratch image for your binary targets. This usually simplifies maintenance
+because the bulk of changes can be made in the macro instead of each targets. Note, if you want
+to enforce a specific base image, say for security reasons, you can declare it in the macro instead of using a
+parameter. You still need the tag rule from before because the tags apply to the push rule.
+With the new macro in place, you import the macro and the tag rule in your target BUILD:
+
+```Starlark
+# Normal Rust rules 
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
+# OCI Push rule
+load("@rules_oci//oci:defs.bzl",  "oci_push")
+# Custom container macro
+load("//:build/container.bzl", "build_multi_arch_image", "build_sha265_tag")
+
+```
+
+With these imports in place, you then use the rules as shown below:
+
+```Starlark
+# Build binary
+rust_binary(
+    name = "bin",
+    # ...
+)
+
+# 1) Build musl multi arch container image
+build_multi_arch_image(
+    name = "image_index",
+    base = "@scratch",
+    srcs = [":bin"],
+    exposed_ports = ["7070", "8080"],
+    platforms = [ "//build/platforms:linux_x86_64_musl",],
+    visibility = ["//visibility:public"],
+)
+
+# 2) Tag image based on the image SHA265 digest.
+build_sha265_tag(
+    name = "remote_tag",
+    image = ":image_index",
+    input = "image.json.sha256",
+    output = "_tag.txt",
+)
+
+# 3) Publish multi-arch with image index to registry
+oci_push(
+    name = "push",
+    image = ":image_index",
+    repository = "my.registry.com/musl",
+    remote_tags = ":tags",
+    visibility = ["//visibility:public"],
+)
+```
+
+With the macro, the previous ceremony reduced to a simple three step process, build, tag, and push.
+As stated before, this approach only makes sense when you have either a larger number of similar container builds or you
+have to enforce a number of (security) polices across the entire project.
