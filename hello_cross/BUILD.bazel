@@ -6,6 +6,7 @@ package(default_visibility = ["//visibility:public"])
 filegroup(
     name = "bin",
     srcs = [
+        ":hello_world_host",
         ":hello_world_x86_64_musl",
         ":hello_world_linux_arm64_musl",
         ":hello_world_x86_64",
@@ -14,6 +15,11 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+rust_binary(
+    name = "hello_world_host",
+    srcs = ["src/main.rs"],
+    deps = [],
+)
 
 rust_binary(
     name = "hello_world_x86_64_musl",

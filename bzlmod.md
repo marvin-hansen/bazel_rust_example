@@ -11,8 +11,11 @@ them.
 1. [Setup](#Setup)
 2. [Rust SDK](#rust-sdk)
 3. [Dependencies](#Dependencies)
+    * [Cargo Workspace](#cargo-workspace)
+    * [Direct Packages](#direct-packages)
 4. [Rust Proto / gRPC](#rust-proto)
 5. [Compiler Optimization](#compiler-optimization)
+6. [Cross Compilation](#cross-compilation)
 
 ## Setup
 
@@ -95,7 +98,7 @@ External dependencies can be declared in one of two ways:
 1) Cargo Workspaces
 2) Direct Packages
 
-### Cargo Workspaces
+### Cargo Workspace
 
 One of the simpler ways to wire up dependencies would be to first structure your project into a Cargo workspace. The
 crates_repository rule can ingest a root Cargo.toml file and generate Bazel dependencies from there.
@@ -406,9 +409,7 @@ config_setting(
 )
 ```
 
-This maps Rusts release mode to Bazel's -c opt.
-
-2) In your binary, add the opt flags & strip settings:
+2) In your binary target, add the opt flags & strip settings prefixed with -C:
 
 ```Starlark 
 # Build binary
@@ -416,7 +417,6 @@ rust_binary(
     name = "bin",
     crate_root = "src/main.rs",
     srcs = glob([
-        "src/*/*.rs",
         "src/*.rs",
     ]),
     # Compiler optimization
@@ -442,3 +442,184 @@ rust_binary(
 3) Run bazel build with optimization
 
 `bazel build -c opt //...`
+
+## Cross Compilation
+
+For cross compilation, you have to specify a custom platform to let Bazel know that you are compiling for a different
+platform than the default host platform.
+
+### Setup
+
+The setup requires two steps, first declare dependencies and toolchains in your MODULE.bazel and second the
+configuration of the cross compilation platforms so you can use it binary targets.
+
+**MODULE Configuration**
+
+You add the required rules for cross compilation to your MODULE.bazel as shown below.
+
+```Starlark
+# Rules for cross compilation
+# https://github.com/bazelbuild/platforms/releases
+bazel_dep(name = "platforms", version = "0.0.10")
+# https://github.com/bazel-contrib/toolchains_llvm
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
+```
+
+Next, you have to configure the LLVM toolchain because rules_rust still needs a cpp toolchain for
+cross compilation and you have to add the specific platform triplets to the Rust toolchain. Suppose you want to compile
+a Rust binary that supports linux on both, X86 and ARM. To do so, you add the following entry to your MODULE file.
+
+```Starlark
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    name = "llvm_toolchain",
+    llvm_version = "16.0.0",
+)
+use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm"
+
+
+# Rust toolchain
+RUST_EDITION = "2021"
+RUST_VERSION = "1.79.0"
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = RUST_EDITION,
+    versions = [RUST_VERSION],
+    extra_target_triples = [
+        "aarch64-unknown-linux-gnu",
+        "x86_64-unknown-linux-gnu",
+    ],
+)
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
+```
+
+Note, you find the exact platform triplets in
+the[ Rust platform support documentation](https://doc.rust-lang.org/nightly/rustc/platform-support.html).
+
+**Platform Configuration**
+
+Once the dependencies are loaded, create an empty BUILD file to define the cross compilation toolchain targets. As
+mentioned earlier, it is best practice to put all custom rules, toolchains, and platform into one folder. Suppose you
+have the empty BUILD file in the following path:
+
+`build/platforms/BUILD.bazel`
+
+Then you add the following content to the BUILD file:
+
+```Starlark
+package(default_visibility = ["//visibility:public"])
+
+platform(
+    name = "linux-aarch64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+platform(
+    name = "linux-x86_64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+```
+
+The default visibility at the top of the file means that all targets in this BUILD file will be public by default, which
+is sensible because cross-compilation targets are usually used across the entire project.
+
+It is important to recognize that the platform rules use the constraint values to map those constraints to the target
+triplets of the Rust toolchain. If you somehow see errors that says some crate couldn't be found with triple xyz, then
+one of two things happened.
+
+Either you forgot to add a triple to the Rust toolchain. Unfortunately, the error message
+doesn't always tell you the correct triple that is missing. However, in that case you have to double check if for each
+specified platform a corresponding Rust extra_target_triples has been added. If one is missing, add it and the error
+goes away.
+
+A second source of error is if the platform declaration contains a typo, for example,
+cpu:arch64 instead of cpu:aarch64. You have to be meticulous in the platform declaration to make everything work
+smoothly.
+
+With the platform configuration out of the way, you are free to configure your binary targets for the specified
+platforms.
+
+### Usage
+
+Suppose you have a simple hello world that is defined in a single main.rs file. Conventionally, you declare a minimum
+binary target as shown below.
+
+```Starlark
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "hello_world_host",
+    srcs = ["src/main.rs"],
+    deps = [],
+)
+```
+
+Bazel compiles this target to the same platform as the host. To cross-compile the same source file to a different
+platform, you simply add one of the platforms previously declared, as shown below.
+
+```Starlark
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "hello_world_x86_64",
+    srcs = ["src/main.rs"],
+    platform = "//build/platforms:linux-x86_64",
+    deps = [],
+)
+
+rust_binary(
+    name = "hello_world_aarch64",
+    srcs = ["src/main.rs"],
+    platform = "//build/platforms:linux-aarch64",
+    deps = [],
+)
+```
+
+You than cross-compile by calling the target.
+
+`bazel build //hello_cross:hello_world_x86_64`
+
+You may have to make the target public when see an access error.
+
+However, when you build for multiple targets, it is sensible to group all of them in a filegroup.
+
+```Starlark
+filegroup(
+    name = "bin",
+    srcs = [
+        ":hello_world_host",
+        ":hello_world_x86_64",
+        ":hello_world_aarch64",
+    ],
+    visibility = ["//visibility:public"],
+)
+```
+
+Then you build for all platforms by calling the filegroup target:
+
+`bazel build //hello_cross:bin`
+
+## MUSL Scratch Container
+
+Rust increasingly becomes a popular choice for building microservice for web application.
+In this context, security and performance are important considerations. Because containerization has
+become the de-facto deployment option, container security starts with choosing a minimal base image.
+Golang established the concept of scratch images, a basically empty container image that only holds a statically
+compiled binary. In Golang, this works because C compatibility is optional and the Go standard library can be compiled
+statically without any calls to an underlying std c lib i.e. glibc on Linux.
+
+In Rust, however, because of its deep interoperability with C, a few more steps and workarounds are required to build a
+static binary packaged in a scratch container.
+
+### Setup
+
+
+
