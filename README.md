@@ -51,8 +51,9 @@ The example code is setup to cross compile from the following hosts to the the f
 * {darwin, aarch64 (Apple Silicon)} -> {linux, x86_64}
 * {darwin, aarch64 (Apple Silicon)} -> {linux, aarch64}
 
-It is important to understand the that LLVM setup for cross compilation is the same for MUSL compilation since MUSL
-technically counts a cross compilation target hence requires the same LLVM setup.
+The LLVM setup for cross compilation is the same for MUSL compilation since MUSL technically counts a cross compilation
+target hence requires the same LLVM setup. For more information on LLVM cross
+compilation, [see the LLVM documentation](https://github.com/bazel-contrib/toolchains_llvm/tree/master?tab=readme-ov-file#sysroots).
 
 To make cross compilation work on your system, please ensure you have a working c/c++ compiler installed (gcc on linux,
 clang / Xcode on Mac) on your system to ensure all required libraries are present.
