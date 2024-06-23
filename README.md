@@ -52,34 +52,8 @@ The example code is setup to cross compile from the following hosts to the the f
 * {darwin, aarch64 (Apple Silicon)} -> {linux, aarch64}
 
 The LLVM setup for cross compilation is the same for MUSL compilation since MUSL technically counts a cross compilation
-target hence requires the same LLVM setup. For more information on LLVM cross
-compilation, [see the LLVM documentation](https://github.com/bazel-contrib/toolchains_llvm/tree/master?tab=readme-ov-file#sysroots).
-
-To make cross compilation work on your system, please ensure you have a working c/c++ compiler installed (gcc on linux,
-clang / Xcode on Mac) on your system to ensure all required libraries are present.
-
-On older linux distros (Ubuntu 16.04) you may encounter an error that a C++ versions before C++ 14 are no longer
-supported. In this case, just install gcc version 7 or newer. This is rare corner case, but there are gcc backports for
-older distributions, so please upgrade your compiler if you ever see this error.
-
-On Ubuntu 20.04 you may see an error that a shared library called libtinfo.so.5 is missing. In that case, just install
-libtinfo via apt-get since its in the official 20.04 repo. The library may have different package names on other
-distributions, but it is a well known
-issue. [See this SO discussion](https://stackoverflow.com/questions/48674104/clang-error-while-loading-shared-libraries-libtinfo-so-5-cannot-open-shared-o)
-for various solutions.
-
-On MacOX, it is usually sufficient to have the Apple Clang compiler installed.
-I don't recommend installing the full Xcode package unless you're developing software for an Apple device. Instead, the
-Xcode Command Line Tools provide everything you need at a much smaller download size. In most cases, a simple:
-
-`xcode-select --install`
-
-From a terminal triggers the installation process. For details and alternative
-options, [read this article on freebootcamp.](https://www.freecodecamp.org/news/install-xcode-command-line-tools/)
-
-Windows is not directly supported, but you can use Linux on Windows with WSL to setup an Ubuntu environment within
-Windows. Please refer to
-the [official WSL documentation for details.](https://learn.microsoft.com/en-us/windows/wsl/install)
+target hence requires the same LLVM setup. If you are new to cross compilation with Bazel,
+please [refer to the documentation.](bzlmod.md#cross-compilation)
 
 ## Container build
 
@@ -93,9 +67,10 @@ container builds, but these can easily be added following the examples given.
 
 The Bazel project decided to change the main configuration from the previous WORKSPACE format to the
 current MODULE (a.k.a bazelmod) format. Since Bazel 7, the Bazelmod format has been set as the new default. This demo
-project uses the current bazelmod, but also comes with a working[ WORKSPACE configuration](config/workspace/WORKSPACE).
-This may help people who are
-trying to convert an existing Bazel project from the previous format to the new Bazelmod configuration format.
+project uses the current bazelmod, but also comes with a basic [ WORKSPACE configuration](config/workspace/WORKSPACE).
+Note, this file is not maintained anymore as Bazelmod is the future. However,
+this file may help people who are trying to convert an existing Bazel project from the previous format to the new
+Bazelmod configuration format.
 
 ## Bazel Commands
 

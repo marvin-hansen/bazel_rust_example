@@ -7,11 +7,12 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 ###############################################################################
-# LLVM SYSROOT
+# SYSROOT FOR LLVM CROSS COMPILATION
 # https://github.com/bazel-contrib/toolchains_llvm/tree/master?tab=readme-ov-file#sysroots
 ###############################################################################
 
-_BUILD_FILE_CONTENT = """filegroup(
+_BUILD_FILE_CONTENT = """
+filegroup(
   name = "{name}",
   srcs = glob(["*/**"]),
   visibility = ["//visibility:public"],
@@ -31,23 +32,3 @@ http_archive(
     sha256 = "902d1a40a5fd8c3764a36c8d377af5945a92e3d264c6252855bda4d7ef81d3df",
     urls = ["https://commondatastorage.googleapis.com/chrome-linux-sysroot/toolchain/41a6c8dec4c4304d6509e30cbaf9218dffb4438e/debian_bullseye_arm64_sysroot.tar.xz"],
 )
-
-###############################################################################
-# BuildBuddy Toolchain
-#
-# Not yet available for Bazelmod.
-# See: https://github.com/buildbuddy-io/buildbuddy-toolchain/issues/18
-#
-# Releases: https://github.com/buildbuddy-io/buildbuddy-toolchain/
-###############################################################################
-http_archive(
-    name = "io_buildbuddy_buildbuddy_toolchain",
-    sha256 = "e899f235b36cb901b678bd6f55c1229df23fcbc7921ac7a3585d29bff2bf9cfd",
-    strip_prefix = "buildbuddy-toolchain-fd351ca8f152d66fc97f9d98009e0ae000854e8f",
-    urls = ["https://github.com/buildbuddy-io/buildbuddy-toolchain/archive/fd351ca8f152d66fc97f9d98009e0ae000854e8f.tar.gz"],
-)
-load("@io_buildbuddy_buildbuddy_toolchain//:deps.bzl", "buildbuddy_deps")
-buildbuddy_deps()
-
-load("@io_buildbuddy_buildbuddy_toolchain//:rules.bzl", "buildbuddy")
-buildbuddy(name = "buildbuddy_toolchain",)

@@ -448,13 +448,28 @@ rust_binary(
 
 For cross compilation, you have to specify a custom platform to let Bazel know that you are compiling for a different
 platform than the default host platform.
+The example code is setup to cross compile from the following hosts to the the following targets:
+
+* {linux, x86_64} -> {linux, aarch64}
+* {linux, aarch64} -> {linux, x86_64}
+* {darwin, x86_64} -> {linux, x86_64}
+* {darwin, x86_64} -> {linux, aarch64}
+* {darwin, aarch64 (Apple Silicon)} -> {linux, x86_64}
+* {darwin, aarch64 (Apple Silicon)} -> {linux, aarch64}
+
+The LLVM setup for cross compilation is the same for MUSL compilation since MUSL technically counts a cross compilation
+target hence requires the same LLVM setup.
+
+Also, before you start with the setup, please ensure you have a working c/c++ compiler installed (gcc on linux, clang /
+Xcode on Mac) on your system to ensure all required libraries are present.
 
 ### Setup
 
-The setup requires two steps, first declare dependencies and toolchains in your MODULE.bazel and second the
-configuration of the cross compilation platforms so you can use it binary targets.
+The setup requires three steps, first declare dependencies and toolchains in your MODULE.bazel, second configure LLVM
+and Rust for cross compilation, and third the configuration of the cross compilation platforms so you can use it binary
+targets.
 
-**MODULE Configuration**
+**Dependencies Configuration**
 
 You add the required rules for cross compilation to your MODULE.bazel as shown below.
 
@@ -466,19 +481,159 @@ bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "toolchains_llvm", version = "1.0.0")
 ```
 
-Next, you have to configure the LLVM toolchain because rules_rust still needs a cpp toolchain for
-cross compilation and you have to add the specific platform triplets to the Rust toolchain. Suppose you want to compile
-a Rust binary that supports linux on both, X86 and ARM. To do so, you add the following entry to your MODULE file.
+**LLVM Configuration**
+
+Next, you have to configure the LLVM toolchain because rules_rust still needs a cpp toolchain for cross compilation and
+you have to add the specific platform triplets to the Rust toolchain. Suppose you want to compile a Rust binary that
+supports linux on both, X86 and ARM. In that case, you have to setup three LLVM toolchains:
+
+1) LLVM for the host
+2) LLVM for X86
+3) LLVM for ARM (aarch64)
+
+For the host LLVM, you just specify a LLVM version and then register the toolchain as usual. The target LLVM toolchains,
+however, have dependencies on system libraries for the target platform. Therefore, it is requires to download a so
+called sysroot that contains a root file system with all those system libraries for the specific target platform. In
+this case, you have to use the WORKSPACE.bzlmod file that bridges between the legacy WORKSPACE format and the newer
+MODULE.bazel format.
+Either crate a new WORKSPACE.bzlmod file if you don't have one yet or open an existing one and add
+the following:
 
 ```Starlark
+###############################################################################
+# rule http_archive
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+###############################################################################
+# SYSROOT FOR LLVM CROSS COMPILATION
+# https://github.com/bazel-contrib/toolchains_llvm/tree/master?tab=readme-ov-file#sysroots
+###############################################################################
+
+_BUILD_FILE_CONTENT = """
+filegroup(
+  name = "{name}",
+  srcs = glob(["*/**"]),
+  visibility = ["//visibility:public"],
+)
+"""
+
+http_archive(
+    name = "org_chromium_sysroot_linux_x64",
+    build_file_content = _BUILD_FILE_CONTENT.format(name = "sysroot"),
+    sha256 = "84656a6df544ecef62169cfe3ab6e41bb4346a62d3ba2a045dc5a0a2ecea94a3",
+    urls = ["https://commondatastorage.googleapis.com/chrome-linux-sysroot/toolchain/2202c161310ffde63729f29d27fe7bb24a0bc540/debian_stretch_amd64_sysroot.tar.xz"],
+)
+
+http_archive(
+    name = "org_chromium_sysroot_linux_aarch64",
+    build_file_content = _BUILD_FILE_CONTENT.format(name = "sysroot"),
+    sha256 = "902d1a40a5fd8c3764a36c8d377af5945a92e3d264c6252855bda4d7ef81d3df",
+    urls = ["https://commondatastorage.googleapis.com/chrome-linux-sysroot/toolchain/41a6c8dec4c4304d6509e30cbaf9218dffb4438e/debian_bullseye_arm64_sysroot.tar.xz"],
+)
+```
+
+Here, we declare to new http downloads that retrieve the sysroot for linux_x64 and linux_aarch64. Note, these are only
+sysroots, that means you have to configure LLVM next to use these files. As mentioned earlier, three LLVM toolchains
+needs to be configured and to do that, please add the following to your MODULE.bazel
+
+```Starlark
+###############################################################################
+# L L V M
+# https://github.com/bazel-contrib/toolchains_llvm/blob/master/tests/MODULE.bazel
+###############################################################################
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+LLVM_VERSIONS = {
+    "": "16.0.0",
+}
+
+# Setup for cross compile & MUSL static binary compile.
+# Both, cross compilation and MUSL still need a C/C++ toolchain with sysroot.
+# https://github.com/bazel-contrib/toolchains_llvm/tree/0d302de75f6ace071ac616fb274481eedcc20e5a?tab=readme-ov-file#sysroots
+
+#
+# Host LLVM toolchain.
 llvm.toolchain(
     name = "llvm_toolchain",
-    llvm_version = "16.0.0",
+    llvm_versions = LLVM_VERSIONS,
 )
-use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm"
+use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
 
+#
+# X86 LLVM Toolchain with sysroot.
+# https://github.com/bazel-contrib/toolchains_llvm/blob/master/tests/WORKSPACE.bzlmod
+llvm.toolchain(
+    name = "llvm_toolchain_x86_with_sysroot",
+    llvm_versions = LLVM_VERSIONS,
+)
 
+llvm.sysroot(
+    name = "llvm_toolchain_x86_with_sysroot",
+    targets = ["linux-x86_64"],
+    label = "@@org_chromium_sysroot_linux_x64//:sysroot",
+)
+use_repo(llvm, "llvm_toolchain_x86_with_sysroot")
+
+#
+# ARM (aarch64) LLVM Toolchain with sysroot.
+# https://github.com/bazelbuild/rules_rust/blob/main/examples/bzlmod/cross_compile/WORKSPACE.bzlmod
+llvm.toolchain(
+    name = "llvm_toolchain_aarch64_with_sysroot",
+    llvm_versions = LLVM_VERSIONS,
+)
+
+llvm.sysroot(
+    name = "llvm_toolchain_aarch64_with_sysroot",
+    targets = ["linux-x86_64"],
+    label = "@@org_chromium_sysroot_linux_aarch64//:sysroot",
+)
+use_repo(llvm, "llvm_toolchain_aarch64_with_sysroot")
+
+# Register all LLVM toolchains
+register_toolchains("@llvm_toolchain//:all")
+```
+
+For simplicity, all toolchains are pinned to version LLVM 16 because it is one of the few releases that supports the
+host (apple-darwin / Ubuntu), and the two targets. For a
+complete [list off all LLVM releases and supported platforms, see this list.](https://github.com/bazel-contrib/toolchains_llvm/blob/master/toolchain/internal/llvm_distributions.bzl)
+It is possible to pin different targets to different LLVM
+versions; [see the documentation for details](https://github.com/bazel-contrib/toolchains_llvm/tree/master?tab=readme-ov-file#per-host-architecture-llvm-version).
+
+**LLVM Troubleshooting**
+
+On older linux distributions (Ubuntu 16.04) you may encounter an error that C++ versions before C++ 14 are no longer
+supported. In this case, just install gcc version 7 or newer. This is rare corner case, but there are gcc backports for
+older distributions, so please upgrade your compiler if you ever see this error.
+
+On Ubuntu 20.04 you may see an error that a shared library called libtinfo.so.5 is missing. In that case, just install
+libtinfo via apt-get since its in the official 20.04 repo. To so, open a terminal and type:
+
+`
+apt update && apt install -y libtinfo5
+`
+
+The libtinfo5 library may have different package names on other distributions, but it is a well known
+issue. [See this SO discussion](https://stackoverflow.com/questions/48674104/clang-error-while-loading-shared-libraries-libtinfo-so-5-cannot-open-shared-o)
+for various solutions.
+
+On MacOX, it is sufficient to have the Apple Clang compiler installed.
+I don't recommend installing the full Xcode package unless you're developing software for an Apple device. Instead, the
+Xcode Command Line Tools provide everything you need at a much smaller download size. In most cases, a simple:
+
+`xcode-select --install`
+
+From a terminal triggers the installation process. For details and alternative
+options, [read this article on freebootcamp.](https://www.freecodecamp.org/news/install-xcode-command-line-tools/)
+
+Windows is not directly supported, but you can use Linux on Windows with WSL to setup an Ubuntu environment within
+Windows. Please refer to
+the [official WSL documentation for details.](https://learn.microsoft.com/en-us/windows/wsl/install)
+
+**Rust Toolchain Configuration**
+
+The Rust toolchain only need to know the additional platform triplets to download the matching toolchains. To do so, add
+or or modify your MODULE.bazel with the following entry:
+
+```Starlark
 # Rust toolchain
 RUST_EDITION = "2021"
 RUST_VERSION = "1.79.0"
@@ -496,14 +651,15 @@ use_repo(rust, "rust_toolchains")
 register_toolchains("@rust_toolchains//:all")
 ```
 
-Note, you find the exact platform triplets in
-the[ Rust platform support documentation](https://doc.rust-lang.org/nightly/rustc/platform-support.html).
+You find the exact platform triplets in
+the [Rust platform support documentation](https://doc.rust-lang.org/nightly/rustc/platform-support.html).
+Next, you have to configure the target platform.
 
 **Platform Configuration**
 
-Once the dependencies are loaded, create an empty BUILD file to define the cross compilation toolchain targets. As
-mentioned earlier, it is best practice to put all custom rules, toolchains, and platform into one folder. Suppose you
-have the empty BUILD file in the following path:
+Once the dependencies are loaded, create an empty BUILD file to define the cross compilation toolchain targets.
+As mentioned earlier, it is best practice to put all custom rules, toolchains, and platform into one folder.
+Suppose you have the empty BUILD file in the following path:
 
 `build/platforms/BUILD.bazel`
 
@@ -645,23 +801,13 @@ bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "toolchains_llvm", version = "1.0.0")
 ```
 
-Then, you have to configure LLVM and add the MUSL triplets to the RUST toolchain.
+Then, you have to configure LLVM and the RUST toolchain.
+For the LLVM toolchain setup, please refer to
+the [LLVM section in the cross compilation documentation](#cross-compilation) as the setup is identical for MUSL.
+Once the LLVM setup is complete, you have to add the MUSL triplets to the Rust toolchain configuration
+so that it downloads the additional toolchains for MUSL targets.
 
 ```Starlark
-# LLVM Toolchain
-# rules_rust still needs a cpp toolchain, so provide a cross-compiling one here
-llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-llvm.toolchain(
-    name = "llvm_toolchain",
-    llvm_version = "16.0.0",
-)
-use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
-register_toolchains("@llvm_toolchain//:all")
-
-# Rust toolchain
-RUST_EDITION = "2021"
-RUST_VERSION = "1.79.0"
-
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = RUST_EDITION,
@@ -733,24 +879,75 @@ platform(
 
 Notice that the path of the linker is set to `//build/linker` so if you chose a different folder,
 you have to update that path accordingly. At this point, you might be tempted to just add the platform to a binary
-target similar to the the cross compilation example. This might work when the binary is the final delivery. However,
-when a scratch container is the deliverable, a few more steps are required.
+target similar to the the cross compilation example. This might work when the binary is the final delivery.
+However, when a scratch container is the deliverable, a few more steps are required.
 
 ### Custom Memory allocator.
 
 There is a long-standing multi threading performance issue in MUSL's default memory allocator
 that causes a
 significant [performance drop of at least 10x or more compared to the default memory allocator in Linux.](https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes)
-The real source of the performance degradation is thread contention is in the malloc implementation of musl. One known
-workaround is
-to [patch the memory allocator in place](https://www.tweag.io/blog/2023-08-10-rust-static-link-with-mimalloc/) using a
-rather obscure assembly tool. A unique alternative Rust offers is the global_allocator trait that, once overwritten with
-a custom allocator, simply replaces the memory allocator Rust uses. There are about 4 different memory allocators
-implementation of the global_allocator trait on GitHub. (Add link). For this example, I chose Jemalloc from the
-Free/NetBSD distro because it is among the most robust and battle tested memory allocators out there that still delivers
-excellent performance under heavy multi-threading workload. Also, because Rust produces quite inflated debug symbols, it
-is sensible to add [compiler optimization ](#compiler-optimization) to build a small and fast binary. To so so, add the
-following to your binary target.
+The real source of the performance degradation is thread contention is in the malloc implementation of musl.
+One known workaround is
+to [patch the memory allocator in place](https://www.tweag.io/blog/2023-08-10-rust-static-link-with-mimalloc/)
+using a rather lesser known assembly tool.
+A unique alternative Rust offers is the global_allocator trait that, once overwritten with
+a custom allocator, simply replaces the memory allocator Rust uses.
+
+There are like three alternative memory allocators available for Rust,
+
+* [jemallocator](https://crates.io/crates/jemallocator)
+* [mimalloc](https://lib.rs/crates/mimalloc)
+* [snmalloc](https://lib.rs/crates/snmalloc-rs)
+
+Notice, Jemalloc has
+a[ known segfault issue when you target embedded platforms](https://github.com/clux/muslrust/issues/142#issuecomment-2152638811)
+where the memory page size varies.
+Specifically, if you compile with Jemalloc on an Apple Silicon for usage on a Raspberry Pi,
+Jemalloc may segfault on the Raspberry Pi due to different memory page sizes because
+Jemalloc bakes the memory page size into the final binary.
+Mimalloc doesn't have this problem, and has performance comparable to Jemalloc.
+Therefore, for embedded devices, Mimalloc is the best choice.
+
+However, on x86 (Intel / AMD), this issue does not exists, and any of the memory allocators listed above works just
+fine.[A benchmarks show that both](https://github.com/rust-lang/rust-analyzer/issues/1441), Jemalloc and Mimalloc
+demonstrate comparable performance so for X86, you can pick any of the two.
+
+For this example, I chose Jemalloc from the Free/NetBSD distro because
+it is a robust and battle tested memory allocators out there that still delivers excellent performance under heavy
+multi-threading workload.
+
+Make sure jemallocator is declared a dependency in your MODULE.bazelmod file:
+
+```Starlark
+###############################################################################
+# R U S T  C R A T E S
+###############################################################################
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+#
+# Custom Memory Allocator
+crate.spec(package = "jemallocator", version = "0.5.4")
+# ... other crate dependencies.
+```
+
+Next, you add a new memory allocator by adding the following lines to your main.rs file:
+
+```Rust
+use jemallocator::Jemalloc;
+
+// Jemalloc overwrites the default memory allocator. This fixes a performance issue in the MUSL.
+// https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
+#[tokio::main]
+async fn main() {
+  // ...
+}
+```
+
+Rust produces inflated debug symbols, therefore, is sensible to add [compiler optimization ](#compiler-optimization) to
+build a small and fast binary. To so so, add the following to your binary target.
 
 ```Starlark
 # Build binary
@@ -815,22 +1012,6 @@ config_setting(
 )
 ```
 
-Next, you add a new memory allocator by adding the following lines to your main.rs file:
-
-```Rust
-use jemallocator::Jemalloc;
-
-// Jemalloc overwrites the default memory allocator. This fixes a performance issue in the MUSL.
-// https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes
-#[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
-
-#[tokio::main]
-async fn main() {
-  // ...
-}
-```
-
 At this point, you want to run a full build and check for any errors.
 
 `bazel build //...`
@@ -841,9 +1022,11 @@ Also run a full release build to double check that the optimization settings wor
 
 ### Scratch image
 
-The new rules_oci build container images in Bazel without Docker. Before you build a container, you have to add base
-image. Previous examples have used the lightweight Distroless containers, but since the binary has been compiled
-statically, all you need is a scratch image. To declare a scratch image, add the following to your MODULE.bazel file:
+The new rules_oci build container images in Bazel without Docker. Before you build a container,
+you have to add base image.
+Previous examples have used the lightweight Distroless containers,
+but since the binary has been compiled statically, all you need is a scratch image.
+To declare a scratch image, add the following to your MODULE.bazel file:
 
 ```Starlark
 ###############################################################################
@@ -863,12 +1046,13 @@ use_repo(oci, "scratch")
 
 In this example, a custom scratch image is used. You can inspect the Docker build file on
 [its public repository](https://github.com/marvin-hansen/rust-scratch). As you can the in
-the [Dockerfile](https://github.com/marvin-hansen/rust-scratch/blob/main/Dockerfile), SSL certificates are copied from
-the base image to ensure encrypted connections work as expected. However, this is also a prime example of how an
+the [Dockerfile](https://github.com/marvin-hansen/rust-scratch/blob/main/Dockerfile),
+SSL certificates are copied from the base image to ensure encrypted connections
+work as expected. However, this is also a prime example of how an
 attacker could sneak in bogus certificates via sloppy supply chain security.
 
-Therefore, it is generally recommended to build and use your own scratch image instead of relying on unknown third
-parties.
+Therefore, it is generally recommended to build and use your own scratch image
+instead of relying on unknown third parties.
 
 The process to build a multi_arch scratch image to hold your statically linked binary takes a few steps:
 
@@ -967,8 +1151,8 @@ build_sha265_tag = rule(
 
 ```
 
-Then, you import this rule together with the multi_arch and some others rules to build a container for your binary
-target.
+Then, you import this rule together with the multi_arch and some others rules
+to build a container for your binary target.
 
 ```Starlark
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_doc_test")
@@ -1073,10 +1257,10 @@ please [consult the official documentation.](https://github.com/bazel-contrib/ru
 
 ### Custom Container Macro
 
-The scratch image configuration feels quite verbose considering all it does is lumping together a bunch
-of tar files in a multi arch bundle. This becomes quickly tedious if you build a lot of containers
-that roughly follow the same blueprint and only differ on a handful of parameters such as exposed ports, the specific
-platform(s) and similar. In that case, it is advisable to write a custom macro that reduces the boilerplate code to a
+The scratch image configuration feels quite verbose and this configuration becomes quickly tedious
+when you build a large number of containers that roughly follow the same blueprint and only differ
+by a handful of parameters such as exposed ports, the specific platform(s) and similar.
+In that case, it is advisable to write a custom macro that reduces the boilerplate code to a
 bare minimum.
 
 In short, open or add a file in
@@ -1192,6 +1376,6 @@ oci_push(
 )
 ```
 
-With the macro, the previous ceremony reduced to a simple three step process, build, tag, and push.
-As stated before, this approach only makes sense when you have either a larger number of similar container builds or you
-have to enforce a number of (security) polices across the entire project.
+With the macro, building a multi-arch container is a three step process, build, tag, and push.
+As stated before, this approach only makes sense when you have either a larger number
+of similar container builds or you have to enforce a number of (security) polices across the entire project.
