@@ -18746,11 +18746,42 @@
     "@@toolchains_llvm~//toolchain/extensions:llvm.bzl%llvm": {
       "general": {
         "bzlTransitiveDigest": "1w0wdH2QnKapJmTbk88f5iQjNlw7vw4f4r1cNf1vWVI=",
-        "usagesDigest": "shuoE5wLCd+qXMrre6BNyTgjDFdNcmUpyXgGWAF+B+g=",
+        "usagesDigest": "MOsAvlLyWJof0/Vg3iKikCaEEqhZFT1prN6c2OQdFa0=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
+          "llvm_toolchain_x86_with_sysroot": {
+            "bzlFile": "@@toolchains_llvm~//toolchain:rules.bzl",
+            "ruleClassName": "toolchain",
+            "attributes": {
+              "absolute_paths": false,
+              "archive_flags": {},
+              "compile_flags": {},
+              "coverage_compile_flags": {},
+              "coverage_link_flags": {},
+              "cxx_builtin_include_directories": {},
+              "cxx_flags": {},
+              "cxx_standard": {},
+              "dbg_compile_flags": {},
+              "exec_arch": "",
+              "exec_os": "",
+              "link_flags": {},
+              "link_libs": {},
+              "llvm_versions": {
+                "": "16.0.0"
+              },
+              "opt_compile_flags": {},
+              "opt_link_flags": {},
+              "stdlib": {},
+              "target_settings": {},
+              "unfiltered_compile_flags": {},
+              "toolchain_roots": {},
+              "sysroot": {
+                "linux-x86_64": "'@@org_chromium_sysroot_linux_x64//:sysroot'"
+              }
+            }
+          },
           "llvm_toolchain": {
             "bzlFile": "@@toolchains_llvm~//toolchain:rules.bzl",
             "ruleClassName": "toolchain",
@@ -18780,6 +18811,57 @@
               "sysroot": {}
             }
           },
+          "llvm_toolchain_aarch64_with_sysroot_llvm": {
+            "bzlFile": "@@toolchains_llvm~//toolchain:rules.bzl",
+            "ruleClassName": "llvm",
+            "attributes": {
+              "alternative_llvm_sources": [],
+              "auth_patterns": {},
+              "distribution": "auto",
+              "exec_arch": "",
+              "exec_os": "",
+              "llvm_mirror": "",
+              "llvm_version": "",
+              "llvm_versions": {
+                "": "16.0.0"
+              },
+              "netrc": "",
+              "sha256": {},
+              "strip_prefix": {},
+              "urls": {}
+            }
+          },
+          "llvm_toolchain_aarch64_with_sysroot": {
+            "bzlFile": "@@toolchains_llvm~//toolchain:rules.bzl",
+            "ruleClassName": "toolchain",
+            "attributes": {
+              "absolute_paths": false,
+              "archive_flags": {},
+              "compile_flags": {},
+              "coverage_compile_flags": {},
+              "coverage_link_flags": {},
+              "cxx_builtin_include_directories": {},
+              "cxx_flags": {},
+              "cxx_standard": {},
+              "dbg_compile_flags": {},
+              "exec_arch": "",
+              "exec_os": "",
+              "link_flags": {},
+              "link_libs": {},
+              "llvm_versions": {
+                "": "16.0.0"
+              },
+              "opt_compile_flags": {},
+              "opt_link_flags": {},
+              "stdlib": {},
+              "target_settings": {},
+              "unfiltered_compile_flags": {},
+              "toolchain_roots": {},
+              "sysroot": {
+                "linux-x86_64": "'@@org_chromium_sysroot_linux_aarch64//:sysroot'"
+              }
+            }
+          },
           "llvm_toolchain_llvm": {
             "bzlFile": "@@toolchains_llvm~//toolchain:rules.bzl",
             "ruleClassName": "llvm",
@@ -18790,8 +18872,30 @@
               "exec_arch": "",
               "exec_os": "",
               "llvm_mirror": "",
-              "llvm_version": "16.0.0",
-              "llvm_versions": {},
+              "llvm_version": "",
+              "llvm_versions": {
+                "": "16.0.0"
+              },
+              "netrc": "",
+              "sha256": {},
+              "strip_prefix": {},
+              "urls": {}
+            }
+          },
+          "llvm_toolchain_x86_with_sysroot_llvm": {
+            "bzlFile": "@@toolchains_llvm~//toolchain:rules.bzl",
+            "ruleClassName": "llvm",
+            "attributes": {
+              "alternative_llvm_sources": [],
+              "auth_patterns": {},
+              "distribution": "auto",
+              "exec_arch": "",
+              "exec_os": "",
+              "llvm_mirror": "",
+              "llvm_version": "",
+              "llvm_versions": {
+                "": "16.0.0"
+              },
               "netrc": "",
               "sha256": {},
               "strip_prefix": {},
