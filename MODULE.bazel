@@ -80,7 +80,7 @@ llvm.toolchain(
 
 llvm.sysroot(
     name = "llvm_toolchain_aarch64_with_sysroot",
-    targets = ["linux-x86_64"],
+    targets = ["linux-aarch64"],
     label = "@@org_chromium_sysroot_linux_aarch64//:sysroot",
 )
 use_repo(llvm, "llvm_toolchain_aarch64_with_sysroot")
